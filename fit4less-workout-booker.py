@@ -19,7 +19,8 @@ class Account():
         self.password=password
         self.email=emailaddress
         self.location=location #Must be exact location
-        self.timesbooked=0
+        self.countbooked=0
+        self.timesbooked={}
 
     def getPassword(self):
         return self.password
@@ -51,8 +52,11 @@ class Account():
                 hour+=(12)
             hour += int(clock[:index_of_colon])
             minute = int(clock[index_of_colon+1:index_of_space])
-            timegym=datetime.datetime.now().replace(hour=int(hour), minute=int(minute))
+            #print(hour, minute)
+            timegym=datetime.datetime.now().replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
+            #print(timegym)
             if minrangetimegym <= timegym <= maxrangetimegym:
+                print("@@@@@@@")
                 #book this time
                 while True:
                     ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
@@ -62,10 +66,11 @@ class Account():
                         break
                     except:
                         continue
+                print("!!!!!!!")
                 booktime.click() #Click on the specifc time to book, falling in the time domain we want
                 driver.find_element_by_id("dialog_book_yes").click() #Accept COVID-19 terms of service 
                 print("Booked time for " + clock)
-                return 1
+                return clock
             
         print()
         return 0
@@ -77,71 +82,86 @@ class Account():
 
 
         # 1) Enter https://www.fit4less.ca/ > 2) Bookworkout
-        driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
+        try:
+            driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
 
 
-        # 3) login
-        # Find username/email box, set
-        email = driver.find_element_by_name('emailaddress')
-        email.send_keys(david.getEmailAddress())
+            # 3) login
+            # Find username/email box, set
+            email = driver.find_element_by_name('emailaddress')
+            email.send_keys(self.getEmailAddress())
 
-        # Find password box, set
-        password = driver.find_element_by_name('password')
-        password.send_keys(david.getPassword())
+            # Find password box, set
+            password = driver.find_element_by_name('password')
+            password.send_keys(self.getPassword())
 
-        # Find login button, click
-        driver.implicitly_wait(5)
-        while True:
-            ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-            sleep(2)
-            try:
-                login_button = driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div')
-                break
-            except:
-                continue
+            # Find login button, click
+            driver.implicitly_wait(5)
+            while True:
+                ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
+                sleep(2)
+                try:
+                    login_button = driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div')
+                    break
+                except:
+                    continue
 
-        login_button.click()
+            login_button.click()
 
-        # 4) Select Club: Ex: North York Centerpoint Mall
-        driver.find_element_by_id('btn_club_select').click()
-        location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(david.getLocation()))
-        location_element.click()
-
-
-        # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
-        #driver.find_element_by_id('btn_date_select').click()
-        today = datetime.date.today()
-        tomorrow=today + datetime.timedelta(days = 1) 
-        dayaftertomorrow=today + datetime.timedelta(days = 2) 
-        days=[today.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), dayaftertomorrow.strftime("%Y-%m-%d")] #Book 3 days in advance
-        print(days)
-
-        for i in days:
-            try: 
-                timesbooked=driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
-            except:
-                print("Booked for all times")
-                return 1
-            self.timesbooked=timesbooked.text[9]
-            selectday_element=driver.find_element_by_id('btn_date_select')
-            selectday_element.click()
-            day_element_name="date_"+i
-            print(day_element_name)
-            sleep(2)
-            driver.find_element_by_id(day_element_name).click()
-
-        # 6) Select time: [TO-DO] No times available -> Recommend tomorrows times, else: Let me select times. Recommend times between a certain preset range, but show all times too.
-            if self.bookTime(driver):
-                print("Booked for ", day_element_name)
+            # 4) Select Club: Ex: North York Centerpoint Mall
+            driver.find_element_by_id('btn_club_select').click()
+            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(daselfvid.getLocation()))
+            location_element.click()
 
 
+            # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
+            #driver.find_element_by_id('btn_date_select').click()
+            today = datetime.date.today()
+            tomorrow=today + datetime.timedelta(days = 1) 
+            dayaftertomorrow=today + datetime.timedelta(days = 2) 
+            days=[today.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), dayaftertomorrow.strftime("%Y-%m-%d")] #Book 3 days in advance
+            print(days)
 
-david=Account('dp05092001', 'peamap101@gmail.com', 'North York Centerpoint Mall')
-start_time="13:00"
-end_time="16:00"
-minrangetimegym=datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
-maxrangetimegym=datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
-print("Starting bot...")
-driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'))
-david.book(driver, minrangetimegym, maxrangetimegym)
-driver.quit()
+            for i in days:
+                print("-------------")
+                try: 
+                    countbooked=driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
+                except:
+                    print("Maximum Booked. Booked {} times".format(self.countbooked))
+                    return 1
+                self.countbooked=countbooked.text[9]
+                selectday_element=driver.find_element_by_id('btn_date_select')
+                selectday_element.click()
+                day_element_name="date_"+i
+                print(day_element_name)
+                sleep(2)
+                driver.find_element_by_id(day_element_name).click()
+
+            # 6) Select time: [TO-DO] No times available -> Recommend tomorrows times, else: Let me select times. Recommend times between a certain preset range, but show all times too.
+                booked = self.bookTime(driver)
+                if booked != 0:
+                    self.timesbooked[i]=booked
+                    print("Booked for ", i)
+
+        except:
+            print("Something went wrong")
+
+
+if __name__ == '__main__':
+    password=sys.argv[1]
+    email=sys.argv[2]
+    location=sys.argv[3]
+    person=Account(password, email, location)
+
+
+    # david=Account('dp05092001', 'peamap101@gmail.com', 'North York Centerpoint Mall')
+    start_time="13:00"
+    end_time="16:00"
+    minrangetimegym=datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
+    maxrangetimegym=datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
+    print("Starting bot...")
+    driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'))
+    person.book(driver, minrangetimegym, maxrangetimegym)
+    print("-------------")
+    print("Booked this section:", person.timesbooked)
+    #driver.quit()
