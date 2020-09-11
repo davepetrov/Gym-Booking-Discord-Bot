@@ -30,7 +30,8 @@ bot.on('message', message=>{
                 //     (error, stdout, stderr) => console.log(stdout))
                 exec('python3 fit4less-workout-booker.py '+password+' '+email+ ' '+location,
                     function (error, stdout, stderr) {
-                        console.log(stdout);
+                        message.author.send(stdout)
+                        //console.log(stdout);
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }

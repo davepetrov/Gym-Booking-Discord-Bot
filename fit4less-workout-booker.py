@@ -11,6 +11,18 @@ from time import sleep
 import datetime
 
 
+def scrollTo(drive, element):
+    '''
+    Prerequisite: The element MUST exist on webpage driver
+    '''
+    while True:
+        ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
+        sleep(2)
+        try:
+            return element
+        except:
+            continue
+    
 class Account():
     '''
     Account associated with fit4less account
@@ -33,12 +45,10 @@ class Account():
 
     def bookTime(self, driver): 
         alltimes_elements = driver.find_elements_by_xpath("(/html/body/div[5]/div/div/div/div/form/div[@class='available-slots'])[2]/div")\
-        
-        print(len(alltimes_elements))
-        if len(alltimes_elements)>0:
-            print("Times exist")
-        else:
-            print("No times avaiable")
+    
+        if len(alltimes_elements)==0:
+            print("No times available for this date")
+            return 0;
 
         for time in alltimes_elements:
             clock = time.get_attribute("data-slottime")[3::]
@@ -48,25 +58,22 @@ class Account():
             index_of_colon=clock.find(':')
             index_of_space=clock.find(' ')
             hour, minute = 0, 0
-            if clock[-2:]=="PM":
-                hour+=(12)
             hour += int(clock[:index_of_colon])
             minute = int(clock[index_of_colon+1:index_of_space])
+            if clock[-2:]=="PM":
+                if hour == 12:
+                    pass
+                else:
+                    hour+=12
+            elif clock[-2:]=="AM" and hour == 12:
+                hour= 0
+            
             #print(hour, minute)
             timegym=datetime.datetime.now().replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
             #print(timegym)
             if minrangetimegym <= timegym <= maxrangetimegym:
-                print("@@@@@@@")
                 #book this time
-                while True:
-                    ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-                    sleep(2)
-                    try:
-                        booktime =driver.find_element_by_id(time_id)
-                        break
-                    except:
-                        continue
-                print("!!!!!!!")
+                booktime=scrollTo(driver,driver.find_element_by_id(time_id))
                 booktime.click() #Click on the specifc time to book, falling in the time domain we want
                 driver.find_element_by_id("dialog_book_yes").click() #Accept COVID-19 terms of service 
                 print("Booked time for " + clock)
@@ -97,20 +104,14 @@ class Account():
 
             # Find login button, click
             driver.implicitly_wait(5)
-            while True:
-                ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-                sleep(2)
-                try:
-                    login_button = driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div')
-                    break
-                except:
-                    continue
-
+            login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
             login_button.click()
 
             # 4) Select Club: Ex: North York Centerpoint Mall
-            driver.find_element_by_id('btn_club_select').click()
-            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(daselfvid.getLocation()))
+
+            selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element.click()
+            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(self.getLocation()))
             location_element.click()
 
 
@@ -130,10 +131,11 @@ class Account():
                     print("Maximum Booked. Booked {} times".format(self.countbooked))
                     return 1
                 self.countbooked=countbooked.text[9]
-                selectday_element=driver.find_element_by_id('btn_date_select')
+
+                selectday_element=scrollTo(driver, driver.find_element_by_id('btn_date_select'))        
                 selectday_element.click()
                 day_element_name="date_"+i
-                print(day_element_name)
+                print("Looking at times for", i)
                 sleep(2)
                 driver.find_element_by_id(day_element_name).click()
 
@@ -143,7 +145,8 @@ class Account():
                     self.timesbooked[i]=booked
                     print("Booked for ", i)
 
-        except:
+        except Exception as e:
+            print(e)
             print("Something went wrong")
 
 
