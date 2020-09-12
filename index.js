@@ -11,36 +11,54 @@ bot.on('ready', () =>{
 
 
 bot.on('message', message=>{
-    if (!message.content.startsWith(PREFIX) || message.author.bot) return;
+    if (!message.content.startsWith(PREFIX) || message.author.bot) return; // Not a command
 
     let args = message.content.substring(PREFIX.length).split(" ");
     var ready = 0;
     console.log(args.length, "arguments sent");
     switch (args[0]){
-        case 'book':
-            if (args.length==4){
+        case 'book': //Books the time for you within the specfic time range
+            if (args.length==5){
+                console.log(location);
                 var password = args[1];
                 var email = args[2];
                 var location = args[3].replace(/-/g, ' ');
-                console.log(location);
                 message.reply("Booking set for user "+email+ " at " + location); //Public
                 message.author.send("Thanks for using Fit4Less Bot. Logging into Fit4Less with "+ email+' : '+ password); //private
-                console.log('./python3 fit4less-workout-booker.py '+password+' '+email+ ' '+location)
-                // exec('./python3 fit4less-workout-booker.py '+password+' '+email+ ' '+location, 
-                //     (error, stdout, stderr) => console.log(stdout))
-                exec('python3 fit4less-workout-booker.py '+password+' '+email+ ' '+location,
+                exec('python3 fit4less-workout-booker.py '+'book'+' '+password+' '+email+ ' '+location+' ' + args[4] +' '+args[5],
                     function (error, stdout, stderr) {
-                        message.author.send(stdout)
-                        //console.log(stdout);
+                        message.author.send(stdout) //private
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }
                     });
         
             }else{
-                message.reply("Invalid command, Usage: !book [PASSWORD] [EMAIL] [EXACT FIT4LESS LOCATION]");
+                message.reply("Use !help for correct usage");
             }
             break;
+        case 'reserved': //Lists you the times you are current booked for
+            if (args.length==3){
+                console.log(location);
+                var password = args[1];
+                var email = args[2];
+                exec('python3 fit4less-workout-booker.py '+'reserved'+' '+password+' '+email,
+                    function (error, stdout, stderr) {
+                        message.author.send(stdout) //private
+                        if (error !== null) {
+                            console.log('exec error: ' + error);
+                        }
+                    });
+            }
+            else{
+                message.reply("Use !help for correct usage");
+            }
+
+             
+        case 'help':
+            message.reply("Book using,              !book [PASSWORD]  [EMAIL]  [EXACT FIT4LESS LOCATION]  [MINIMUM TIME RANGE (24hr)]  [MAXIMUM  TIME RANGE (24hr)]");
+            message.reply("See reserved times,      !reserved [PASSWORD]  [EMAIL]");
+            message.reply("For help,                !help");
     }  
 })
 
