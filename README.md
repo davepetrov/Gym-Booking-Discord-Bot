@@ -7,11 +7,11 @@ Join https://discord.gg/hA2nmE6 and use the following commands!
 ## Commands
 ### !book
 #### Parameters:
-  - password
+  - Password
   - Email address
   - Exact fit4less location
-  - Minimum wanted time range to book for
-  - Maximum wanted time range to book for
+  - Minimum time range to book
+  - Maximum time range to book
 #### Description/example:
 In short, this command does all the automated booking, reserving all the times within the spedific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the location "Centerpoint-Mall". The user calls the command from the server, gets a private message revealing the private login information.
   
@@ -21,8 +21,8 @@ In short, this command does all the automated booking, reserving all the times w
   
 ### !reserved
 #### Parameters:
-- password 
-- email
+- Password 
+- Email
 #### Description:
 Lists all the times the user is currently schedueledfor
 
@@ -34,3 +34,6 @@ The bot replies with a list of availabe locations, the user will copy whichever 
    
 ### !help
 Lists all the commands with short descriptions
+
+## TODO:
+Add a login command that saves the user's information
