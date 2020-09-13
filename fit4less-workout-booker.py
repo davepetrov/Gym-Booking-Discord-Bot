@@ -40,6 +40,21 @@ class Account():
     def getEmailAddress(self):
         return self.email
 
+    def login(self, driver):
+        driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
+
+        # Find username/email box, set
+        email = driver.find_element_by_name('emailaddress')
+        email.send_keys(self.getEmailAddress())
+
+        # Find password box, set
+        password = driver.find_element_by_name('password')
+        password.send_keys(self.getPassword())
+
+        # Find login button, click
+        driver.implicitly_wait(5)
+        login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
+        login_button.click()
 
     def bookTime(self, driver): 
         alltimes_elements = driver.find_elements_by_xpath("(/html/body/div[5]/div/div/div/div/form/div[@class='available-slots'])[2]/div")
@@ -50,8 +65,6 @@ class Account():
 
         for time in alltimes_elements:
             clock = time.get_attribute("data-slottime")[3::]
-            
-            print(clock)
             time_id = time.get_attribute("id")
             index_of_colon=clock.find(':')
             index_of_space=clock.find(' ')
@@ -88,25 +101,7 @@ class Account():
 
         # 1) Enter https://www.fit4less.ca/ > 2) Bookworkout
         try:
-            driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
-
-
-            # 3) login
-            # Find username/email box, set
-            email = driver.find_element_by_name('emailaddress')
-            email.send_keys(self.getEmailAddress())
-
-            # Find password box, set
-            password = driver.find_element_by_name('password')
-            password.send_keys(self.getPassword())
-
-            # Find login button, click
-            driver.implicitly_wait(5)
-            login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
-            login_button.click()
-
-            # 4) Select Club: Ex: North York Centerpoint Mall
-
+            self.login(driver)
             selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
@@ -119,10 +114,9 @@ class Account():
             tomorrow=today + datetime.timedelta(days = 1) 
             dayaftertomorrow=today + datetime.timedelta(days = 2) 
             days=[today.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), dayaftertomorrow.strftime("%Y-%m-%d")] #Book 3 days in advance
-            # print(days)
 
             for i in days:
-                print("-------------")
+                #print("-------------")
                 try: 
                     countbooked=driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
                 except:
@@ -133,39 +127,41 @@ class Account():
                 selectday_element=scrollTo(driver, driver.find_element_by_id('btn_date_select'))        
                 selectday_element.click()
                 day_element_name="date_"+i
-                print("Looking at times for", i)
+                #print("Looking at times for", i)
                 sleep(2)
                 driver.find_element_by_id(day_element_name).click()
 
                 booked = self.bookTime(driver)
                 if booked != 0:
                     self.timesbooked[i]=booked
-                    print("Booked for {}, {}".format(i, self.timesbooked[i]))
 
         except Exception as e:
             print(e)
             print("Something went wrong, check inputs")
 
-    def getReserved(self):
+    def getReserved(self, driver):
         try:
-            driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
-
-            # Find username/email box, set
-            email = driver.find_element_by_name('emailaddress')
-            email.send_keys(self.getEmailAddress())
-
-            # Find password box, set
-            password = driver.find_element_by_name('password')
-            password.send_keys(self.getPassword())
-
-            # Find login button, click
-            driver.implicitly_wait(5)
-            login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
-            login_button.click()
-
-            alltimes_elements = driver.find_elements_by_xpath("/html/body/div[5]/div/div/div/div/form/div[@class='reserved-slots'/div")
+            self.login(driver)
+            alltimes_elements = driver.find_elements_by_xpath("/html/body/div[5]/div/div/div/div/form/div/div")
             for i in alltimes_elements:
-                print(i.getattribute('data-slottime'));
+                if i.get_attribute('data-slotdate')==None: # Very hack-ish, fix
+                    return 0
+                print('-',i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'));
+            return 1
+
+        except Exception as e:
+            print(e)
+            print("Something went wrong, check inputs")
+            
+    def getLocations(self, driver):
+        try:
+            self.login(driver)
+            selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element.click()
+            clubs=driver.find_elements_by_xpath("/html/body/div[3]/div/div/div[2]/div/div")
+            
+            for i in clubs:
+                print(i.text.replace(" ",'-'))
 
         except Exception as e:
             print(e)
@@ -183,17 +179,17 @@ if __name__ == '__main__':
     driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'))
 
     if function == 'book':
-        location=sys.argv[4]
+        location=sys.argv[4].replace('-', ' ')
         start_time=sys.argv[5]
         end_time=sys.argv[6]
         minrangetimegym=datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
         maxrangetimegym=datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
         person.book(driver, location, minrangetimegym, maxrangetimegym)
+        person.getReserved(driver)
     elif function == 'reserved':
-        person.getReserved()
+        person.getReserved(driver)
+    elif function == 'locations':
+        person.getLocations(driver)
     else:
         print("Unknown command")
-
-    print("-------------")
-    print("Successfully booked for ", person.timesbooked)
-    #driver.quit()
+   # driver.quit()
