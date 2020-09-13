@@ -56,6 +56,12 @@ class Account():
         login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
         login_button.click()
 
+        #print(driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text)
+        if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
+            print("Incorrect credentials, check again")
+            return 0
+        return 1
+
     def bookTime(self, driver): 
         alltimes_elements = driver.find_elements_by_xpath("(/html/body/div[5]/div/div/div/div/form/div[@class='available-slots'])[2]/div")
     
@@ -101,7 +107,8 @@ class Account():
 
         # 1) Enter https://www.fit4less.ca/ > 2) Bookworkout
         try:
-            self.login(driver)
+            if not self.login(driver):
+                return 0
             selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
@@ -141,7 +148,8 @@ class Account():
 
     def getReserved(self, driver):
         try:
-            self.login(driver)
+            if not self.login(driver):
+                return 0
             alltimes_elements = driver.find_elements_by_xpath("/html/body/div[5]/div/div/div/div/form/div/div")
             for i in alltimes_elements:
                 if i.get_attribute('data-slotdate')==None: # Very hack-ish, fix
@@ -155,7 +163,8 @@ class Account():
             
     def getLocations(self, driver):
         try:
-            self.login(driver)
+            if not self.login(driver):
+                return 0
             selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             clubs=driver.find_elements_by_xpath("/html/body/div[3]/div/div/div[2]/div/div")
@@ -192,4 +201,4 @@ if __name__ == '__main__':
         person.getLocations(driver)
     else:
         print("Unknown command")
-   # driver.quit()
+    driver.quit()
