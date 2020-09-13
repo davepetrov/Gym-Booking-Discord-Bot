@@ -1,6 +1,6 @@
 const {Client} = require('discord.js');
 const bot = new Client();
-const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.RvOK6SfyYRC1LGtveeNoOLfqjdo';
+const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.PIM4tifixkMxXgOsJq1fjIXdJAA';
 const exec = require('child_process').exec
 
 let PREFIX = "!";

@@ -18,7 +18,7 @@ def scrollTo(driver, element):
     '''
     while True:
         ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-        sleep(2)
+        #sleep(2)
         try:
             return element
         except:
@@ -44,15 +44,15 @@ class Account():
         driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
 
         # Find username/email box, set
-        email = driver.find_element_by_name('emailaddress')
+        email = scrollTo(driver, driver.find_element_by_name('emailaddress'))
         email.send_keys(self.getEmailAddress())
 
         # Find password box, set
-        password = driver.find_element_by_name('password')
+        password = scrollTo(driver,driver.find_element_by_name('password'))
         password.send_keys(self.getPassword())
 
         # Find login button, click
-        driver.implicitly_wait(5)
+        #driver.implicitly_wait(5)
         login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
         login_button.click()
 
@@ -111,8 +111,13 @@ class Account():
                 return 0
             selectclub_element=scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
-            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
-            location_element.click()
+            try:
+                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
+                location_element.click()
+            except:
+                print("Incorrect location, try again")
+                return 0
+
 
 
             # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
@@ -135,7 +140,6 @@ class Account():
                 selectday_element.click()
                 day_element_name="date_"+i
                 #print("Looking at times for", i)
-                sleep(2)
                 driver.find_element_by_id(day_element_name).click()
 
                 booked = self.bookTime(driver)
@@ -143,8 +147,11 @@ class Account():
                     self.timesbooked[i]=booked
 
         except Exception as e:
-            print(e)
-            print("Something went wrong, check inputs")
+            pass
+            #print(e)
+            #print("Booked )
+        print("Finished booking")
+        return 1
 
     def getReserved(self, driver):
         try:
@@ -158,8 +165,9 @@ class Account():
             return 1
 
         except Exception as e:
-            print(e)
-            print("Something went wrong, check inputs")
+            pass
+            #print(e)
+            #print("Something went wrong, check inputs")
             
     def getLocations(self, driver):
         try:
@@ -178,27 +186,33 @@ class Account():
 
 
 if __name__ == '__main__':
-    function=sys.argv[1] #book or reserved
-    password=sys.argv[2]
-    email=sys.argv[3]    
-    person=Account(password, email)
+    try:
+        function=sys.argv[1] #book or reserved
+        password=sys.argv[2]
+        email=sys.argv[3]    
+        person=Account(password, email)
 
 
-    # david=Account('dp05092001', 'peamap101@gmail.com', 'North York Centerpoint Mall')
-    driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'))
+        # david=Account('dp05092001', 'peamap101@gmail.com', 'North York Centerpoint Mall')
+        options = webdriver.ChromeOptions()
+        #options.add_argument('headless')
+        #options.add_argument('window-size=1920x1080'); 
+        driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'), options=options)
 
-    if function == 'book':
-        location=sys.argv[4].replace('-', ' ')
-        start_time=sys.argv[5]
-        end_time=sys.argv[6]
-        minrangetimegym=datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
-        maxrangetimegym=datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
-        person.book(driver, location, minrangetimegym, maxrangetimegym)
-        person.getReserved(driver)
-    elif function == 'reserved':
-        person.getReserved(driver)
-    elif function == 'locations':
-        person.getLocations(driver)
-    else:
+        if function == 'book':
+            location=sys.argv[4].replace('-', ' ')
+            start_time=sys.argv[5]
+            end_time=sys.argv[6]
+            minrangetimegym=datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
+            maxrangetimegym=datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
+            if person.book(driver, location, minrangetimegym, maxrangetimegym) != 0:
+                person.getReserved(driver)
+        elif function == 'reserved':
+            person.getReserved(driver)
+        elif function == 'locations':
+            person.getLocations(driver)
+        else:
+            print("Unknown command")
+        #driver.quit()
+    except:
         print("Unknown command")
-    driver.quit()
