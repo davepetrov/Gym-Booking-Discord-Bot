@@ -71,6 +71,8 @@ bot.on('message', message=>{
             message.reply("!locations"); 
             message.reply("!help");
             break;
+        default:
+            message.author.send("Use !help for correct usage")
     }  
 })
 
