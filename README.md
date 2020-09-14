@@ -4,6 +4,12 @@ A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms 
 # How to use the bot
 Join https://discord.gg/zDpsGyj and use the following commands!
 
+# Running the bot on your own
+```sh 
+node index.js
+```
+If you want the bot to stay online, keep the program running
+
 ## Commands
 ### !book
 #### Parameters:
