@@ -1,6 +1,6 @@
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
-const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.fe12kb9nHAjTe-8Zt2CWOlry8IE';
+const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.b3goJan66P9v-_XpdWRbObHfBmQ';
 const exec = require('child_process').exec
 
 
@@ -53,10 +53,17 @@ bot.on('message', message=>{
                 console.log(location);
                 var password = args[1];
                 var email = args[2];
-                message.author.send("Checking Fit4less for reserved times, this may take a minute...");
+                const publicmsg = new MessageEmbed()
+                    .setTitle("Checking Fit4less for reserved times, this may take a minute...")
+                    .setColor(0xff0000);
+                message.author.send(publicmsg);
                 exec('python3 fit4less-workout-booker.py '+'reserved'+' '+password+' '+email,
                     function (error, stdout, stderr) {
-                        message.author.send(stdout) //private
+                        const reservedmessage = new MessageEmbed()
+                            .setTitle("You are booked for the following times")
+                            .setColor(0xffa500)
+                            .setDescription((stdout));
+                        message.author.send(reservedmessage) //private
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }

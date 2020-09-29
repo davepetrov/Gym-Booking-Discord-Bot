@@ -21,9 +21,7 @@ If you want the bot to stay online, keep the program running in the background.
 #### Description/example:
 In short, this command does all the automated booking, reserving all the times within the specific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location. The user calls the command from the server and gets a private message revealing the private login information with all the booked times.
   
-  <img src="/images/book-showcase2.png" width="600">
-  <img src="/images/book-showcase1.png" width="600">
-  
+  <img src="/images/book-showcase.png" width="700">
   
 ### !reserved
 #### Parameters:
@@ -32,7 +30,7 @@ In short, this command does all the automated booking, reserving all the times w
 #### Description:
 Lists all of the current scheudeled times
 
-<img src="/images/reserved-showcase.png" width="600">
+<img src="/images/reserved-showcase.png" width="700">
   
   
 ### !locations
