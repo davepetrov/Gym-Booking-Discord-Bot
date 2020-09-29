@@ -150,7 +150,7 @@ class Account():
             pass
             #print(e)
             #print("Booked )
-        print("Finished booking")
+        print(" ")
         return 1
 
     def getReserved(self, driver):
@@ -213,6 +213,6 @@ if __name__ == '__main__':
             person.getLocations(driver)
         else:
             print("Unknown command")
-        #driver.quit()
+        driver.quit()
     except:
         print("Unknown command")

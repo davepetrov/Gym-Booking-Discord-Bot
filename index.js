@@ -1,12 +1,13 @@
-const {Client} = require('discord.js');
+const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
-const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.PIM4tifixkMxXgOsJq1fjIXdJAA';
+const token = 'NzUzNzM0NTEyNzEzNzkzNjg5.X1qf9w.fe12kb9nHAjTe-8Zt2CWOlry8IE';
 const exec = require('child_process').exec
+
 
 let PREFIX = "!";
 
 bot.on('ready', () =>{
-    console.log("Fit4Less Bot is Online");
+    console.log("Fit4Less Bot is Online with new updates");
 })
 
 
@@ -23,12 +24,21 @@ bot.on('message', message=>{
                 var password = args[1];
                 var email = args[2];
                 var location = args[3];
-                message.reply("Booking set for user "+email+ " at " + location); //Public
-                message.author.send("Thanks for using Fit4Less Bot. Logging into Fit4Less with "+ email+' : '+ password); //private
-                message.author.send("Checking Fit4less for available times, this may take a minute...");
+                const publicmsg = new MessageEmbed()
+                    .setTitle("Booking set for user "+email+ " at " + location)
+                    .setColor(0xff0000)
+                    .setDescription(("Checking Fit4less for available times, this may take a minute..."));
+
+                message.reply(publicmsg); //Public
                 exec('python3 fit4less-workout-booker.py '+'book'+' '+password+' '+email+ ' '+location+' ' + args[4] +' '+args[5],
                     function (error, stdout, stderr) {
-                        message.author.send(stdout) //private
+                        
+                        const bookingmessage = new MessageEmbed()
+                            .setTitle("You are booked for the following times")
+                            .setColor(0xffa500)
+                            .setDescription((stdout));
+
+                        message.author.send(bookingmessage) //private
                         if (error !== null) {
                             console.log('exec error: ' + error);
                         }
@@ -75,5 +85,15 @@ bot.on('message', message=>{
             message.author.send("Use !help for correct usage")
     }  
 })
+
+
+// Create an event listener for new guild members
+bot.on('guildMemberAdd', member => {
+    // Send the message to a designated channel on a server:
+    const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
+    if (!channel) return;
+    // Send the message, mentioning the member
+    channel.send(`Welcome to Fit4Less Bot Server, ${member}`);
+  });
 
 bot.login(token);
