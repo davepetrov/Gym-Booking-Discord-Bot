@@ -2,8 +2,9 @@
 
 A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms are completely booked, but now its time to workout after months of endless quarantine. Let the bot do the annoying part...the booking! Through discord, you can specify a time range that you want to work out, the specific gym(s) you are signed up for, and the bot will book the time slot for you before anyone else can take your spot and will remind you when your next work out will be. Now you can go to the gym without worrying about missing an available time slot that fits your schedule.
 
-# How to use the bot
+# How to use the bot 
 Join https://discord.gg/zDpsGyj and use the following commands!
+###### *Note*: Currently Unavailable for use, Ping me if you'd like me to reactivate :)
 
 # Running the bot on your own
 ```sh 
