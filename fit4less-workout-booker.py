@@ -18,7 +18,6 @@ def scrollTo(driver, element):
     '''
     while True:
         ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-        #sleep(2)
         try:
             return element
         except:
@@ -52,11 +51,9 @@ class Account():
         password.send_keys(self.getPassword())
 
         # Find login button, click
-        #driver.implicitly_wait(5)
         login_button=scrollTo(driver,driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
         login_button.click()
 
-        #print(driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text)
         if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
             print("Incorrect credentials, check again")
             return 0
@@ -66,7 +63,6 @@ class Account():
         alltimes_elements = driver.find_elements_by_xpath("(/html/body/div[5]/div/div/div/div/form/div[@class='available-slots'])[2]/div")
     
         if len(alltimes_elements)==0:
-            #print("No times available for this date")
             return 0;
 
         for time in alltimes_elements:
@@ -85,9 +81,8 @@ class Account():
             elif clock[-2:]=="AM" and hour == 12:
                 hour= 0
             
-            #print(hour, minute)
             timegym=datetime.datetime.now().replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
-            #print(timegym)
+
             if minrangetimegym <= timegym <= maxrangetimegym:
                 #book this time
                 booktime=scrollTo(driver,driver.find_element_by_id(time_id))
@@ -100,10 +95,6 @@ class Account():
         return 0
 
     def book(self, driver, location, minrangetimegym, maxrangetimegym):
-        # driver = webdriver.safari.webdriver.WebDriver(quiet=False)
-        # driver = webdriver.Firefox()
-        #driver.maximize_window()
-
 
         # 1) Enter https://www.fit4less.ca/ > 2) Bookworkout
         try:
@@ -121,7 +112,6 @@ class Account():
 
 
             # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
-            #driver.find_element_by_id('btn_date_select').click()
             today = datetime.date.today()
             tomorrow=today + datetime.timedelta(days = 1) 
             dayaftertomorrow=today + datetime.timedelta(days = 2) 
@@ -148,8 +138,7 @@ class Account():
 
         except Exception as e:
             pass
-            #print(e)
-            #print("Booked )
+            
         print(" ")
         return 1
 
@@ -166,8 +155,6 @@ class Account():
 
         except Exception as e:
             pass
-            #print(e)
-            #print("Something went wrong, check inputs")
             
     def getLocations(self, driver):
         try:
@@ -192,8 +179,6 @@ if __name__ == '__main__':
         email=sys.argv[3]    
         person=Account(password, email)
 
-
-        # david=Account('dp05092001', 'peamap101@gmail.com', 'North York Centerpoint Mall')
         options = webdriver.ChromeOptions()
         #options.add_argument('headless')
         #options.add_argument('window-size=1920x1080'); 
