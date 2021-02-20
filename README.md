@@ -16,7 +16,7 @@ pip install webdriver-manager
 ```
 Start the discord bot
 ```sh 
-node index.js
+node discord-bot.js
 ```
 If you want the bot to stay online, keep the program running in the background.
 
@@ -49,6 +49,5 @@ The bot replies with a list of available locations, the user will copy whichever
 ### !help
 Lists all the commands with short descriptions
 
-## TODO:
-- Add a login command that saves the user's information
-- Book with friends
+# Donate
+You can donate to my PayPal at https://www.paypal.com/paypalme2/davidpetrovcode
