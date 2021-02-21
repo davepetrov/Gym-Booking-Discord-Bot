@@ -5,8 +5,8 @@ A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms 
 This bot was originally a personal project, but with Canada opening in the following weeks, more traffic is picking up so ive decided to open up the bot for public use
 
 # How to use the bot 
-Join https://discord.gg/zDpsGyj and use the following commands!
-###### *Note*: Currently Unavailable for use, Ping me if you'd like me to reactivate :)
+Simply add this bot to your discord server by clicking [here](https://discord.com/api/oauth2/authorize?client_id=812832537516310568&permissions=0&scope=bot)
+###### *Note*: The bot is currently up and running. If there are any issues, please contact me by creating an issue request on GitHub
 
 # Running the bot on your own
 Install the following dependencies
