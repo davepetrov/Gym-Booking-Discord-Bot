@@ -50,4 +50,6 @@ The bot replies with a list of available locations, the user will copy whichever
 Lists all the commands with short descriptions
 
 # Donate
-You can donate to my PayPal at https://www.paypal.com/paypalme2/davidpetrovcode
+*Please note that the bot is free. If you feel that this utility made your life easier, do not hesitate to send a donation :) Enjoy your stress free workout*
+
+<img src="https://1000logos.net/wp-content/uploads/2017/05/emblem-Paypal.jpg" width="20"> https://www.paypal.com/paypalme2/davidpetrovcode
