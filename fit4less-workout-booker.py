@@ -153,7 +153,7 @@ class Account():
         try:
             if not self.login(driver):
                 return 0
-            alltimes_elements = driver.find_elements_by_xpath("/html/body/div[5]/div/div/div/div/form/div/div")
+            alltimes_elements = driver.find_elements_by_css_selector(".reserved-slots > .time-slot")
             for i in alltimes_elements:
                 # Very hack-ish, fix in future
                 if i.get_attribute('data-slotdate') == None:
@@ -205,7 +205,7 @@ if __name__ == '__main__':
                 start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
             maxrangetimegym = datetime.datetime.now().replace(hour=int(
                 end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
-                
+
             if person.book(driver, location, minrangetimegym, maxrangetimegym) != 0:
                 person.getReserved(driver)
 
