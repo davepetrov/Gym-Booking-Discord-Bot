@@ -13,15 +13,12 @@ import datetime
 
 
 def scrollTo(driver, element):
-    '''
-    Prerequisite: The element MUST exist on webpage driver
-    '''
-    while True:
-        ActionChains(driver).send_keys(Keys.PAGE_DOWN).perform()
-        try:
-            return element
-        except:
-            continue
+    driver.execute_script("""arguments[0].scrollIntoView({
+            block: 'center',
+            inline: 'center'
+        });""", element)
+    return element
+
 
 class Account():
     '''
@@ -52,7 +49,7 @@ class Account():
         password.send_keys(self.getPassword())
 
         # Find login button, click
-        login_button = scrollTo(driver, driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/form/div[2]/div[1]/div'))
+        login_button = scrollTo(driver, driver.find_element_by_id('loginButton'))
         login_button.click()
 
         if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
@@ -61,7 +58,7 @@ class Account():
         return 1
 
     def bookTime(self, driver):
-        alltimes_elements = driver.find_elements_by_xpath("(/html/body/div[5]/div/div/div/div/form/div[@class='available-slots'])[2]/div")
+        alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
 
         if len(alltimes_elements) == 0:
             return 0
