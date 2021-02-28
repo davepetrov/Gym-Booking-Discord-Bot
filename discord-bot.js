@@ -7,6 +7,26 @@ const exec = require('child_process').exec
 
 let PREFIX = "!";
 
+def isFit4lessUser(username):
+// go throug all entrys in db
+            // if matches users discord id:
+            //     user in the db
+            //     book with all the config
+            // else:
+            //     user not in the db
+            //     return that config is not setup, use !config
+
+
+
+let db = new sqlite3.Database('./db/chinook.db', (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Connected to the Fit4Less Booking database.');
+  });
+
+
+
 bot.on('ready', () =>{
     console.log("Fit4Less Bot is now Online with new updates");
 })
@@ -20,7 +40,26 @@ bot.on('message', message=>{
     console.log(args.length, "arguments sent");
     
     switch (args[0]){
+        case 'config': //change config
+
+        // go throug all entrys in db
+        // if matches users discord id:
+        //     user in the db
+        //     change the config
+        // else:
+        //     user not in the db
+        //     create new entry with config
+
         case 'book': //Books the time for you within the specfic time range
+
+            // go throug all entrys in db
+            // if matches users discord id:
+            //     user in the db
+            //     book with all the config
+            // else:
+            //     user not in the db
+            //     return that config is not setup, use !config
+
             if (args.length==6){
                 console.log(location);
                 var password = args[1];

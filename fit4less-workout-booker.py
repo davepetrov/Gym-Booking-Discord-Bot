@@ -46,7 +46,7 @@ class Account():
 
         # Find password box, set
         password = scrollTo(driver, driver.find_element_by_name('password'))
-        password.send_keys(self.getPassword())
+        password.send_keys(self.getPassword())++__
 
         # Find login button, click
         login_button = scrollTo(driver, driver.find_element_by_id('loginButton'))
@@ -173,7 +173,6 @@ class Account():
             return False
 
         except Exception as e:
-            print(e)
             print("Something went wrong, check inputs")
 
 
