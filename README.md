@@ -1,12 +1,20 @@
 ![Gym-Booking-Discord-Bot](https://socialify.git.ci/davepetrov/Gym-Booking-Discord-Bot/image?description=1&font=Inter&language=1&owner=1&pattern=Diagonal%20Stripes&theme=Light)
 
+# ANNOUNCEMENT
+`A new version of the bot is coming out on Friday Evening. Features include automated booking with toggle switch, Saved ENCRYPTED config so you wouldnt need to constantly type your login when you use the !book and !reserved commands. `
+
+## Description
 A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms are completely booked, but now its time to workout after months of endless quarantine. Let the bot do the annoying part...the booking! Through discord, you can specify a time range that you want to work out, the specific gym(s) you are signed up for, and the bot will book the time slot for you before anyone else can take your spot and will remind you when your next work out will be. Now you can go to the gym without worrying about missing an available time slot that fits your schedule. 
 
 This bot was originally a personal project, but with Canada opening in the following weeks, more traffic is picking up so ive decided to open up the bot for public use
 
 # How to use the bot 
+### Add it to your server!
 Simply add this bot to your discord server by clicking [here](https://discord.com/api/oauth2/authorize?client_id=812832537516310568&permissions=0&scope=bot)
-###### *Note*: The bot is currently up and running. If there are any issues, please contact me by creating an issue request on GitHub
+###### *Note*: The bot is currently up and running. If there are any issues, please contact me by creating an issue request on GitHub with an attatched screenshot
+
+### Join the discord server!
+You can also join my discord server by clicking [here](https://discord.gg/rrb9K42CDU). You can type your commands in the "Book here" text channel. 
 
 # Running the bot on your own
 Install the following dependencies
@@ -23,11 +31,11 @@ If you want the bot to stay online, keep the program running in the background.
 ## Commands
 ### !book
 #### Parameters:
-  - Password
-  - Email address
-  - Exact fit4less location
-  - Minimum time range to book
-  - Maximum time range to book
+      - Password
+      - Email address
+      - Exact fit4less location
+      - Minimum time range to book
+      - Maximum time range to book
 #### Description/example:
 In short, this command does all the automated booking, reserving all the times within the specific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location. The user calls the command from the server and gets a private message revealing the private login information with all the booked times.
   
@@ -35,8 +43,8 @@ In short, this command does all the automated booking, reserving all the times w
   
 ### !reserved
 #### Parameters:
-- Password 
-- Email
+      - Password 
+      - Email
 #### Description:
 Lists all of the current scheudeled times
 
