@@ -1,7 +1,7 @@
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 const exec = require('child_process').exec
-let PREFIX = "/";
+let PREFIX = "!";
 let db = require('better-sqlite3')('./db/fit.db');
 
 function setConfig(message, userid, email, password, location, begin, end){
@@ -32,7 +32,6 @@ function setConfig(message, userid, email, password, location, begin, end){
     return;
 }
 
-
 function sendConfigErrorMessage(message){
     console.log("sendConfigErrorMessage");
 
@@ -40,6 +39,18 @@ function sendConfigErrorMessage(message){
         .setTitle("ERROR")
         .setColor(0xff0000)
         .setDescription('Dont forget to setup your configuration using !config');
+
+    message.author.send(configmsg);
+    return;
+}
+
+function sendFieldErrorMessage(message, field){
+    console.log("sendConfigErrorMessage");
+
+    const configmsg = new MessageEmbed()
+        .setTitle("ERROR")
+        .setColor(0xff0000)
+        .setDescription(`Field ${field} is not a valid configuration, please check !help`);
 
     message.author.send(configmsg);
     return;
@@ -192,11 +203,29 @@ function autobookToggle(message, userid){
     return;
 }
 
+function updateField(message, userid, fieldKey, fieldVal){
+
+    if (!isFit4lessUser(userid)){
+        sendConfigErrorMessage(message);
+        return;
+    }
+
+    const updatemsg = new MessageEmbed()
+            .setTitle("CONFIG")
+            .setColor(0x009cdf) 
+            .setDescription(`Updating your config ${fieldKey} with ${fieldVal}`);
+        message.author.send(updatemsg) ;
+
+    db.prepare(`UPDATE USER SET ${fieldKey}=${fieldVal} WHERE discordId=${userid}`).run();
+    return;
+}
+
+// Bot online msg
 bot.on('ready', () =>{
     console.log("Fit4Less Bot is now Online with new updates");
 })
 
-
+// Bot recieves prompt
 bot.on('message', message=>{  
     console.log("---------------------------\n")
     if (!message.content.startsWith(PREFIX)) return; // Not a command
@@ -210,6 +239,33 @@ bot.on('message', message=>{
     
     switch (args[0]){
         case 'config': 
+            if (args.length >=2){
+                switch (args[0]){
+                    case "-email":
+                        updateField(message, userid, "email", val);
+                        break;
+
+                    case "-password":
+                        updateField(message, userid, "password", val);
+                        break;
+
+                    case "-location":
+                        updateField(message, userid, "location", val);
+                        break;
+
+                    case "-begin":
+                        updateField(message, userid, "begin", val);
+                        break;
+
+                    case "-end":
+                        updateField(message, userid, "email", val);
+                        break;
+
+                    default:
+                        sendFieldErrorMessage(message, args[0]);
+                        break
+                }
+            }
             if (args.length!=6){
                 sendHelpMessage(message);
                 break;
@@ -250,6 +306,16 @@ bot.on('message', message=>{
     }  
 })
 
+// Create an event listener for new guild members
+bot.on('guildMemberAdd', member => {
+    // Send the message to a designated channel on a server:
+    const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
+    if (!channel) return;
+
+    // Send the message, mentioning the member
+    channel.send(`Welcome to Fit4Less Bot Server, ${member}`);
+});
+
 // Autobook for all the users with autobooking toggled on
 setInterval(function(){
     console.log("checking interbal stuff");
@@ -266,18 +332,6 @@ setInterval(function(){
         }
     }
 }, 60000); // Repeat every 60000 milliseconds (1 min)
-
-
-// Create an event listener for new guild members
-bot.on('guildMemberAdd', member => {
-    // Send the message to a designated channel on a server:
-    const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
-    if (!channel) return;
-
-    // Send the message, mentioning the member
-    channel.send(`Welcome to Fit4Less Bot Server, ${member}`);
-});
-
 
 //Run
 const fs = require('fs');
