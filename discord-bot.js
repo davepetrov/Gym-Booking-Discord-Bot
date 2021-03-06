@@ -1,9 +1,12 @@
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 const exec = require('child_process').exec
-let PREFIX = "!";
+let PREFIX = "/";
+let db = require('better-sqlite3')('./db/fit.db');
 
 function sendConfigErrorMessage(message){
+    console.log("sendConfigErrorMessage");
+
     const configmsg = new MessageEmbed()
         .setTitle("ERROR")
         .setColor(0xff0000)
@@ -13,49 +16,58 @@ function sendConfigErrorMessage(message){
     return;
 }
 
-function sendHelpMessage(message){
-    const setmsg = new MessageEmbed()
+function sendSetConfigMessage(message){
+    console.log("sendSetConfigMessage");
+
+    const configsetmsg = new MessageEmbed()
         .setTitle("CONFIG")
         .setColor(0xff0000)
-        .setDescription('Set up configuration for user');
-    message.author.send(setmsg) ;
+        .setDescription('Setting/updating config');
+
+    message.author.send(configsetmsg); 
     return;
 }
 
 function sendHelpMessage(message){
+    console.log("sendHelpMessage");
+
     const helpmsg = new MessageEmbed()
         .setTitle("HELP")
         .setColor(0xff0000)
         .setDescription(
-            'Setup saved configuration: !config [EMAIL]  [PASSWORD] [EXACT FIT4LESS LOCATION]  [MINIMUM TIME RANGE (24hr)]  [MAXIMUM  TIME RANGE (24hr)]\n'+
-            'Book manually: !book/n'+
-            'Toggle booking automatically: !autobook/n'+
-            'Check your booked times: !reserved\n'+
+            'Setup saved configuration: !config [EMAIL]  [PASSWORD] [EXACT FIT4LESS LOCATION]  [MINIMUM TIME RANGE (24hr)]  [MAXIMUM  TIME RANGE (24hr)]'+
+            'Book manually: !book'+
+            'Toggle booking automatically: !autobook'+
+            'Check your booked times: !reserved'+
             'Get all possible locations: !locations'+
             'More help: !help');
 
-    message.author.send(helpmsg) ;
+    message.author.send(helpmsg);
     return;
 }
 
 function sendLocationsMessage(message){
+    console.log("sendLocationsMessage");
+
     message.author.send("Available Locations", {
         files:['./locations.txt']
     });
     message.author.send("Copy the location and use that as a location argument when using !book")
 }
 
-function sendHDefaultMessage(message){
-    const erromsg = new MessageEmbed()
+function sendDefaultMessage(message){
+    console.log("sendDefaultMessage");
+    const errormsg = new MessageEmbed()
         .setTitle("ERROR")
         .setColor(0xff0000)
         .setDescription('Use help for correct usage(s)');
 
-    message.author.send(erromsg) 
+    message.author.send(errormsg);
     return;
 }
 
-function isFit4lessUser(db, discordId){
+function isFit4lessUser(discordId){
+    
     // if matches users discord id:
     //     user in the db
     //     return true
@@ -64,41 +76,56 @@ function isFit4lessUser(db, discordId){
     //     return false
 
     // TODO: Fix this. Does this return 0 or false/ 1 or true
-    return db.exec("SELECT EXISTS (SELECT * FROM USER ON discordId=${discordId})")
+    const a = db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
+    return a!=undefined;
 }
 
-function book(db, message, discordId){
-    var email =  db.exec('SELECT email FROM USER ON discordId=${userid}')
-    var password =  db.exec('SELECT password FROM USER ON discordId=${userid}')
-    var location =  db.exec('SELECT location FROM USER ON discordId=${userid}')
-    var begin =  db.exec('SELECT begin FROM USER ON discordId=${userid}')
-    var end =  db.exec('SELECT end FROM USER ON discordId=${userid}')
+function printDatabase(){
+    // console.log("\nPRINT DATABASE:");
+    // const rows = db.prepare(`SELECT * FROM USER`).all();
+    // console.log(rows+'\n');
+    // for (var row in rows){
+    //     console.log(row.discordId,row.email,row.password, row.location, row.begin, row.end);
+    // }
+}
+
+function book(message, discordId){
+    console.log("book");
+    var email =  db.prepare('SELECT email FROM USER WHERE discordId='+discordId).get()
+    var password =  db.prepare('SELECT password FROM USER WHERE discordId='+discordId).get()
+    var location =  db.prepare('SELECT location FROM USER WHERE discordId='+discordId).get()
+    var begin =  db.prepare('SELECT begin FROM USER WHERE discordId='+discordId).get()
+    var end =  db.prepare('SELECT end FROM USER WHERE discordId='+discordId).get()
+
+    console.log(email, password, location, begin, end);
     
-    sendBookingMessage(message){
-        const publicmsg = new MessageEmbed()
-        .setTitle('Booking set for user ${email} at ${location} from ${start} to ${end}')
-        .setColor(0xff0000)
-        .setDescription(("Checking Fit4less for available times, this may take a minute..."));
+    const publicmsg = new MessageEmbed()
+    .setTitle('Booking set for user '+email+'at '+location+' from '+begin+' to '+end)
+    .setColor(0xff0000)
+    .setDescription(("Checking Fit4less for available times, this may take a minute..."));
 
-        message.reply(publicmsg); //Public
-        exec('python3 fit4less-workout-booker.py book ${password} ${email} ${location} ${start} ${end}',
-            function (error, stdout, stderr) {
-                const bookingmessage = new MessageEmbed()
-                    .setTitle("You are booked for the following times")
-                    .setColor(0xffa500)
-                    .setDescription((stdout));
+    message.reply(publicmsg); //Public
+    exec('python3 fit4less-workout-booker.py book '+password+ ''+email+ +location+ ''+begin+ ''+end,
+        function (error, stdout, stderr) {
+            const bookingMsg = new MessageEmbed()
+                .setTitle("You are booked for the following times")
+                .setColor(0xffa500)
+                .setDescription((stdout));
 
-                message.author.send(bookingmessage) //private
-                if (error !== null) {
-                    console.log('exec error: ' + error);
-                }
-        });
-    }
+            message.author.send(bookingMsg) //private
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+    });
+    
 }
 
-function checkReserved(db, message, discordId){
-    var email =  db.exec("SELECT email FROM USER ON discordId=${discordId}")
-    var password =  db.exec("SELECT password FROM USER ON discordId=${discordId}")
+function checkReserved(message, discordId){
+    console.log("checkReserved");
+    var email =  db.prepare("SELECT email FROM USER WHERE discordId="+discordId).run();
+    var password =  db.prepare("SELECT password FROM USER WHERE discordId="+discordId).run();
+
+    console.log(email, password);
 
     const publicmsg = new MessageEmbed()
         .setTitle("Checking Fit4less for reserved times, this may take a minute...")
@@ -118,18 +145,33 @@ function checkReserved(db, message, discordId){
         });
 }
 
-function autobookToggle(db, message){
-    var togglevalue =  db.exec("SELECT autobook FROM USER ON discordId=${userid}")    
-    var togglevalueNew = !togglevalue;
-    db.run('UPDATE USERS SET autobook=${togglevalueNew} WHERE discordId=${userid}');
+function autobookToggle(message, userid){
+    var togglevalue =  db.prepare(`SELECT autobook FROM USER WHERE discordId=${userid}`).get().autobook;
+    var newtogglevalue = (togglevalue===0) ? 1 : 0
+    db.prepare(`UPDATE USER SET autobook=${newtogglevalue} WHERE discordId=${userid}`).run();
 
-    const automsg = new MessageEmbed()
+    console.log(togglevalue, "->", newtogglevalue);
+
+    if (newtogglevalue===0){
+        var desc = "[OFF]"
+        var color = 0xFF0000;
+    }
+    else{
+        var desc = "[ON]"
+        var color = 0x00FF00;
+    }
+    const togglemsg = new MessageEmbed()
         .setTitle("AUTOBOOK")
-        .setColor(0x00FF00)
-        .setDescription('Autobook feature Toggled ${togglevalueNew}');
+        .setColor(color) 
+        .setDescription(`Autobook feature Toggled ${desc}`);
 
-    message.author.send(automsg) ;
+    message.author.send(togglemsg) ;
     return;
+}
+
+function isAutobookToggle(userid){
+    var togglevalue =  db.prepare(`SELECT autobook FROM USER WHERE discordId=${userid}`).get().autobook;
+    return (togglevalue===0)? false : true;
 }
 
 bot.on('ready', () =>{
@@ -137,24 +179,16 @@ bot.on('ready', () =>{
 })
 
 
-bot.on('message', message=>{    
-    if (!message.content.startsWith(PREFIX) || message.author.bot) return; // Not a command
-
-    let db = new sqlite3.Database('./db/fit.db', (err) => {
-        if (err) {
-        console.error(err.message);
-        }
-        console.log('Connected to the Fit4Less Booking database.');
-    });
+bot.on('message', message=>{  
+    console.log("---------------------------\n")
+    if (!message.content.startsWith(PREFIX)) return; // Not a command
 
     var username = message.author.username;
     console.log("username:"+username)
     var userid = message.author.id;
     console.log("userid:"+userid)
 
-
     let args = message.content.substring(PREFIX.length).split(" ");
-    console.log(args.length, "arguments sent");
     
     switch (args[0]){
         case 'config': 
@@ -168,43 +202,54 @@ bot.on('message', message=>{
             var location =  args[3];
             var begin =  args[4];
             var end =  args[5];
-
-            if (!isFit4lessUser(db, userid)){
+            
+            console.log(email, password, location, begin, end);
+            
+            if (!isFit4lessUser(userid)){
+                console.log("not user");
                 // add new entry
-                db.run('INSERT INTO USERS (discordId, email, password, location, begin, end) VALUES (${userid}, ${email}, ${password}, ${location}, ${begin}, ${end})');
+                
+                db.prepare(`INSERT INTO USER (discordId, email, password, location, begin, end) VALUES ('${userid}', '${email}', '${password}', '${location}', '${begin}', '${end}')`).run();
             }
-            // update the config
-            db.run('UPDATE USERS SET email=${email}, password=${password}, location=${location}, begin=${begin}, end=${end} WHERE discordId=${userid}');
-            break;
-        
-        case 'autobook':
-            if (!isFit4lessUser(db, user)){
-                sendConfigErrorMessage(message);
-                break
+            else{
+                console.log("is user");
+                 // update the config
+                db.prepare(`UPDATE USER SET email='${email}', password='${password}', location='${location}', begin='${begin}', end='${end}' WHERE discordId='${userid}'`).run();
             }
 
+            printDatabase();
+            break;
+            
+        case 'autobook':
+            if (!isFit4lessUser(userid)){
+                sendConfigErrorMessage(message);
+                break;
+            }
+            
             //Toggle
-            autobookToggle(db, message);
+            autobookToggle(message, userid);
             break;
 
         case 'book': //Books the time for you within the specfic time range
-            if (!isFit4lessUser(db, userid)){
+            if (!isFit4lessUser(userid)){
                 sendConfigErrorMessage(message);
-                break
+                console.log('Not user');
+                break;
             }
+            console.log('Is user');
 
             //book with all the config
-            book(db, message, userid);
+            book(message, userid);
             break;
 
         case 'reserved': //Lists you the times you are current booked for
-            if (!isFit4lessUser(db, userid)){
+            if (!isFit4lessUser(userid)){
                 sendConfigErrorMessage(message);
                 break;
             }
 
             //check reserved times with all the config
-            checkReserved(db, message, userid);
+            checkReserved(message, userid);
             break;
 
         case 'locations':
@@ -216,9 +261,17 @@ bot.on('message', message=>{
             break;
             
         default:
-            sendHDefaultMessage();
+            sendDefaultMessage();
     }  
 })
+
+// Autobook for all the users with autobooking toggled on
+window.setInterval(function(){
+    var date = new Date(); // Create a Date object to find out what time it is
+    if(date.getHours() === 1 && date.getMinutes() === 1){ 
+        rows=
+    }
+}, 60000); // Repeat every 60000 milliseconds (1 minute)
 
 
 // Create an event listener for new guild members
@@ -230,6 +283,7 @@ bot.on('guildMemberAdd', member => {
     // Send the message, mentioning the member
     channel.send(`Welcome to Fit4Less Bot Server, ${member}`);
 });
+
 
 //Run
 const fs = require('fs');
