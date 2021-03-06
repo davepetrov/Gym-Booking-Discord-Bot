@@ -6,6 +6,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException        
 import os
 import sys
 from time import sleep
@@ -19,6 +20,12 @@ def scrollTo(driver, element):
         });""", element)
     return element
 
+def elementExists(driver, xpath):
+    try:
+        driver.find_element_by_xpath(xpath)
+    except NoSuchElementException:
+        return False
+    return True
 
 class Account():
     '''
@@ -46,7 +53,7 @@ class Account():
 
         # Find password box, set
         password = scrollTo(driver, driver.find_element_by_name('password'))
-        password.send_keys(self.getPassword())++__
+        password.send_keys(self.getPassword())
 
         # Find login button, click
         login_button = scrollTo(driver, driver.find_element_by_id('loginButton'))
@@ -106,8 +113,7 @@ class Account():
             selectclub_element.click()
 
             try:
-                location_element = driver.find_element_by_xpath(
-                    "//div[contains(text(),'{}')]".format(location))
+                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
                 location_element.click()
             except:
                 print("Incorrect location, try again")
@@ -130,8 +136,7 @@ class Account():
 
                 self.countbooked = countbooked.text[9]
 
-                selectday_element = scrollTo(
-                    driver, driver.find_element_by_id('btn_date_select'))
+                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
                 selectday_element.click()
                 day_element_name = "date_"+i
                 driver.find_element_by_id(day_element_name).click()
@@ -155,8 +160,7 @@ class Account():
                 # Very hack-ish, fix in future
                 if i.get_attribute('data-slotdate') == None:
                     return 0
-                print('-', i.get_attribute('data-slotdate'),
-                      i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
+                print('-', i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
             return 1
 
         except Exception as e:
@@ -166,14 +170,19 @@ class Account():
         try:
             if not self.login(driver):
                 return 0
-            title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
-            if title == "Your club is closed":
-                print("Your gym is closed")
-                return True
+            if elementExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
+                title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
+                if title == "Your club is closed":
+                    print("Your gym is closed")
+                    return True
+
+            print("Your gym is Open")
             return False
 
         except Exception as e:
-            print("Something went wrong, check inputs")
+            print("Your gym is Open"+ e)
+            return False
+
 
 
 if __name__ == '__main__':
@@ -184,7 +193,7 @@ if __name__ == '__main__':
         person = Account(password, email)
 
         options = webdriver.ChromeOptions()
-        options.add_argument('headless')
+        # options.add_argument('headless')
         # options.add_argument('window-size=1920x1080');
         # driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'), options=options)
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
@@ -197,10 +206,8 @@ if __name__ == '__main__':
             location = sys.argv[4].replace('-', ' ')
             start_time = sys.argv[5]
             end_time = sys.argv[6]
-            minrangetimegym = datetime.datetime.now().replace(hour=int(
-                start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
-            maxrangetimegym = datetime.datetime.now().replace(hour=int(
-                end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
+            minrangetimegym = datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
+            maxrangetimegym = datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
 
             if person.book(driver, location, minrangetimegym, maxrangetimegym) != 0:
                 person.getReserved(driver)
@@ -211,6 +218,6 @@ if __name__ == '__main__':
         else:
             print("Unknown command")
 
-        driver.quit()
+        # driver.quit()
     except Exception as e:
         print("Something went wrong, please contact David @ davidpetrovx@gmail.com with the following error message: \n"+ e)
