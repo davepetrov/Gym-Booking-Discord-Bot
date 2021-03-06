@@ -6,7 +6,7 @@
 *  *  *  *  *
 
 ## Description
-A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms are completely booked, but now its time to workout after months of endless quarantine. Let the bot do the annoying part...the booking! Through discord, you can specify a time range that you want to work out, the specific gym(s) you are signed up for, and the bot will book the time slot for you before anyone else can take your spot and will remind you when your next work out will be. Now you can go to the gym without worrying about missing an available time slot that fits your schedule. 
+A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms are completely booked, but now its time to workout after months of endless quarantine. Let the bot do the annoying part...the booking! Through discord, you can specify a time range that you want to work out, the specific gym(s) you are signed up for, and the bot will book the time slot for you before anyone else can take your spot and will remind you when your next work out will be. Now you can go to the gym without worrying about missing an available time slot that fits your schedule.
 
 This bot was originally a personal project, but with Canada opening in the following weeks, more traffic is picking up so ive decided to open up the bot for public use
 
@@ -43,7 +43,7 @@ If you want the bot to stay online, keep the program running in the background.
 - Minimum time range to book (24 hour)
 - Maximum time range to book (24 hour)
 
-This command sets up the configuration with all of your login details, prefered location, and your time interval for which you would want the bot to book for. The bot will find the earliest time slot available within this timeframe and book for that day, if available. If you are not already a user, you call `!config default@email password123 gym-location 11:00 17:00` to be added to our list of users. If you are already a user, calling the exact same command will update your previous config.
+This command sets up the configuration with all of your login details, preferred location, and your time interval for which you would want the bot to book for. The bot will find the earliest time slot available within this timestamp and book for that day, if available. If you are not already a user, you call `!config default@email password123 gym-location 11:00 17:00` to be added to our list of users. If you are already a user, calling the exact same command will update your previous config.
 
 You can also use `!config -{Field} {Value}` to update a particular field in your configuration. For example, if you want to update your previous email, call `!config -email new@email`. List of available fields include: email, password, location, begin, end
 
@@ -55,7 +55,7 @@ You can also use `!config -{Field} {Value}` to update a particular field in your
 `!autobook` You can toggle on and off if you want the bot to auto book for you without you having to use the !book command every 3 days. *You need to setup your configuration before calling this command*
   
 `!reserved`
-Lists all of the current scheudeled times. *You need to setup your configuration before calling this command*  
+Lists all of the current scheduled times. *You need to setup your configuration before calling this command*  
   
 `!locations`
 The bot replies with a list of available locations, the user will copy whichever location into the [location] field when setting up the config.
