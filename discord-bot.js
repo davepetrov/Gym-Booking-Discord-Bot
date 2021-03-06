@@ -1,7 +1,7 @@
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 const exec = require('child_process').exec
-let PREFIX = "/";
+let PREFIX = "!";
 let db = require('better-sqlite3')('./db/fit.db');
 
 function setConfig(message, userid, email, password, location, begin, end){
@@ -63,12 +63,7 @@ function sendHelpMessage(message){
         .setTitle("HELP")
         .setColor(0xff0000)
         .setDescription(
-            'Setup saved configuration: !config [EMAIL]  [PASSWORD] [EXACT FIT4LESS LOCATION]  [MINIMUM TIME RANGE (24hr)]  [MAXIMUM  TIME RANGE (24hr)]'+
-            'Book manually: !book'+
-            'Toggle booking automatically: !autobook'+
-            'Check your booked times: !reserved'+
-            'Get all possible locations: !locations'+
-            'More help: !help');
+            'Check out my github for a list of all available commands, with a full description of what each command does:\n https://github.com/davepetrov/Gym-Booking-Discord-Bot');
 
     message.author.send(msg);
     return;
@@ -105,17 +100,21 @@ function book(message, discordId){
         return;
     }
 
-    console.log("book");
     var user =  db.prepare('SELECT * FROM USER WHERE discordId='+discordId).get()
 
     console.log(user.email, user.password);
     if (message!=null){
+        console.log("Booking time for user manually");
+
         const msg = new MessageEmbed()
         .setTitle(`Booking set for user ${user.email} at ${user.location} from ${user.begin} to ${user.end}`)
         .setColor(0xff0000)
         .setDescription(("Checking Fit4less for available times, this may take a minute...Sit tight"));
 
         message.reply(msg); //Public
+    }
+    else{
+        console.log("Booking time for user automatically");
     }
 
     exec(`python3 fit4less-workout-booker.py book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
@@ -220,8 +219,8 @@ bot.on('ready', () =>{
 
 // Bot recieves prompt
 bot.on('message', message=>{  
-    console.log("---------------------------\n")
     if (!message.content.startsWith(PREFIX)) return; // Not a command
+    console.log("\n")
 
     var username = message.author.username;
     console.log("username:"+username)
@@ -297,7 +296,7 @@ bot.on('message', message=>{
             break;
             
         default:
-            sendDefaultMessage();
+            sendDefaultMessage(message);
     }  
 })
 
@@ -313,7 +312,6 @@ bot.on('guildMemberAdd', member => {
 
 // Autobook for all the users with autobooking toggled on
 setInterval(function(){
-    console.log("checking interbal stuff");
     var date = new Date(); // Create a Date object to find out what time it is
     var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
     var estDate = new Date(datezone - (3600000*5));
