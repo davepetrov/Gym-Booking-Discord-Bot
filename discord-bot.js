@@ -1,7 +1,7 @@
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 const exec = require('child_process').exec
-let PREFIX = "!";
+let PREFIX = "/";
 let db = require('better-sqlite3')('./db/fit.db');
 
 function setConfig(message, userid, email, password, location, begin, end){
@@ -12,22 +12,22 @@ function setConfig(message, userid, email, password, location, begin, end){
         // add new entry
         db.prepare(`INSERT INTO USER (discordId, email, password, location, begin, end) VALUES ('${userid}', '${email}', '${password}', '${location}', '${begin}', '${end}')`).run();
         
-        const configsetmsg = new MessageEmbed()
+        const msg = new MessageEmbed()
             .setTitle("CONFIG")
             .setColor(0x61bf33)
-            .setDescription('Setting up new config for you. You can now use !book to book');
-        message.author.send(configsetmsg); 
+            .setDescription('Setting up new config for you. *You can now use !book to book*');
+        message.author.send(msg); 
     }
     else{
         console.log("is user, updating");
         // update the config
         db.prepare(`UPDATE USER SET email='${email}', password='${password}', location='${location}', begin='${begin}', end='${end}' WHERE discordId='${userid}'`).run();
         
-        const configsetmsg = new MessageEmbed()
+        const msg = new MessageEmbed()
             .setTitle("CONFIG")
             .setColor(0x009cdf)
-            .setDescription('Updating your existing config. You can now use !book to book');
-        message.author.send(configsetmsg); 
+            .setDescription('Updating your existing config. *You can now use !book to book*');
+        message.author.send(msg); 
     }
     return;
 }
@@ -35,31 +35,31 @@ function setConfig(message, userid, email, password, location, begin, end){
 function sendConfigErrorMessage(message){
     console.log("sendConfigErrorMessage");
 
-    const configmsg = new MessageEmbed()
+    const msg = new MessageEmbed()
         .setTitle("ERROR")
         .setColor(0xff0000)
         .setDescription('Dont forget to setup your configuration using !config');
 
-    message.author.send(configmsg);
+    message.author.send(msg);
     return;
 }
 
 function sendFieldErrorMessage(message, field){
-    console.log("sendConfigErrorMessage");
+    console.log("sendFieldErrorMessage");
 
-    const configmsg = new MessageEmbed()
+    const msg = new MessageEmbed()
         .setTitle("ERROR")
         .setColor(0xff0000)
-        .setDescription(`Field ${field} is not a valid configuration, please check !help`);
+        .setDescription(`Field ${field} is not a valid configuration, *please check !help*`);
 
-    message.author.send(configmsg);
+    message.author.send(msg);
     return;
 }
 
 function sendHelpMessage(message){
     console.log("sendHelpMessage");
 
-    const helpmsg = new MessageEmbed()
+    const msg = new MessageEmbed()
         .setTitle("HELP")
         .setColor(0xff0000)
         .setDescription(
@@ -70,7 +70,7 @@ function sendHelpMessage(message){
             'Get all possible locations: !locations'+
             'More help: !help');
 
-    message.author.send(helpmsg);
+    message.author.send(msg);
     return;
 }
 
@@ -85,54 +85,48 @@ function sendLocationsMessage(message){
 
 function sendDefaultMessage(message){
     console.log("sendDefaultMessage");
-    const errormsg = new MessageEmbed()
+    const msg = new MessageEmbed()
         .setTitle("ERROR")
         .setColor(0xff0000)
         .setDescription('Use help for correct usage(s)');
 
-    message.author.send(errormsg);
+    message.author.send(msg);
     return;
 }
 
 function isFit4lessUser(discordId){
-    
-    // TODO: Fix this. Does this return 0 or false/ 1 or true
-    const a = db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
-    return a!=undefined;
+    const user = db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
+    return user!=undefined;
 }
 
 function book(message, discordId){
-
-    if (!isFit4lessUser(userid)){
+    if (!isFit4lessUser(discordId)){
         sendConfigErrorMessage(message);
         return;
     }
 
     console.log("book");
-    var email =  db.prepare('SELECT email FROM USER WHERE discordId='+discordId).get()
-    var password =  db.prepare('SELECT password FROM USER WHERE discordId='+discordId).get()
-    var location =  db.prepare('SELECT location FROM USER WHERE discordId='+discordId).get()
-    var begin =  db.prepare('SELECT begin FROM USER WHERE discordId='+discordId).get()
-    var end =  db.prepare('SELECT end FROM USER WHERE discordId='+discordId).get()
+    var user =  db.prepare('SELECT * FROM USER WHERE discordId='+discordId).get()
 
+    console.log(user.email, user.password);
     if (message!=null){
-        const publicmsg = new MessageEmbed()
-        .setTitle('Booking set for user '+email+'at '+location+' from '+begin+' to '+end)
+        const msg = new MessageEmbed()
+        .setTitle(`Booking set for user ${user.email} at ${user.location} from ${user.begin} to ${user.end}`)
         .setColor(0xff0000)
-        .setDescription(("Checking Fit4less for available times, this may take a minute..."));
+        .setDescription(("Checking Fit4less for available times, this may take a minute...Sit tight"));
 
-        message.reply(publicmsg); //Public
+        message.reply(msg); //Public
     }
 
-    exec('python3 fit4less-workout-booker.py book '+password+ ''+email+ +location+ ''+begin+ ''+end,
+    exec(`python3 fit4less-workout-booker.py book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (message!=null){
-                const bookingMsg = new MessageEmbed()
+                const msg = new MessageEmbed()
                     .setTitle("You are booked for the following times")
                     .setColor(0xffa500)
                     .setDescription((stdout));
                 
-                message.author.send(bookingMsg) //private
+                message.author.send(msg) //private
             }
             if (error !== null) {
                 console.log('exec error: ' + error);
@@ -142,31 +136,29 @@ function book(message, discordId){
 }
 
 function checkReserved(message, discordId){
-    if (!isFit4lessUser(userid)){
+    if (!isFit4lessUser(discordId)){
         sendConfigErrorMessage(message);
         return;
     }
 
     console.log("checkReserved");
-    var email =  db.prepare("SELECT email FROM USER WHERE discordId="+discordId).run();
-    var password =  db.prepare("SELECT password FROM USER WHERE discordId="+discordId).run();
-
-    console.log(email, password);
+    var user =  db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
 
     if (message != null){
-        const publicmsg = new MessageEmbed()
-            .setTitle("Checking Fit4less for reserved times, this may take a minute...")
+        const msg = new MessageEmbed()
+            .setTitle("Check Reserved times")
+            .setDescription("*This may take a minute...Sit tight*")
             .setColor(0xff0000);
-        message.author.send(publicmsg);
+        message.author.send(msg);
     }
-    exec('python3 fit4less-workout-booker.py reserved'+' '+password+' '+email,
+    exec(`python3 fit4less-workout-booker.py reserved ${user.password} ${user.email}`,
         function (error, stdout, stderr) {
             if (message!=null){
-                const reservedmessage = new MessageEmbed()
+                const msg = new MessageEmbed()
                     .setTitle("You are booked for the following times")
                     .setColor(0xffa500)
                     .setDescription((stdout));
-                message.author.send(reservedmessage) //private
+                message.author.send(msg) //private
             }
             if (error !== null) {
                 console.log('exec error: ' + error);
@@ -187,36 +179,37 @@ function autobookToggle(message, userid){
 
     console.log(togglevalue, "->", newtogglevalue);
     if (newtogglevalue===0){
-        const togglemsg = new MessageEmbed()
+        const msg = new MessageEmbed()
             .setTitle("AUTOBOOK")
             .setColor(0xFF0000) 
-            .setDescription(`Autobook feature Toggled OFF - You will have to manually use !book to book for the next 3 days`);
-        message.author.send(togglemsg) ;
+            .setDescription(`Autobook feature Toggled OFF - *You will have to manually use !book to book for the next 3 days*`);
+        message.author.send(msg) ;
 
     }else{
-        const togglemsg = new MessageEmbed()
+        const msg = new MessageEmbed()
             .setTitle("AUTOBOOK")
             .setColor(0x00FF00) 
-            .setDescription(`Autobook feature Toggled ON - You will now be autobooked and guarenteed a spot until this feature is toggled off`);
-        message.author.send(togglemsg) ;
+            .setDescription(`Autobook feature Toggled ON - *You will now be autobooked and guaranteed a spot until this feature is toggled off*`);
+        message.author.send(msg) ;
     }
     return;
 }
 
 function updateField(message, userid, fieldKey, fieldVal){
+    console.log(`updating field: ${fieldKey}: ${fieldVal}`);
 
     if (!isFit4lessUser(userid)){
         sendConfigErrorMessage(message);
         return;
     }
 
-    const updatemsg = new MessageEmbed()
-            .setTitle("CONFIG")
-            .setColor(0x009cdf) 
-            .setDescription(`Updating your config ${fieldKey} with ${fieldVal}`);
-        message.author.send(updatemsg) ;
+    const msg = new MessageEmbed()
+        .setTitle("CONFIG")
+        .setColor(0x009cdf) 
+        .setDescription(`Updating your config **${fieldKey}** with **${fieldVal}**`);
+    message.author.send(msg) ;
 
-    db.prepare(`UPDATE USER SET ${fieldKey}=${fieldVal} WHERE discordId=${userid}`).run();
+    db.prepare(`UPDATE USER SET ${fieldKey}='${fieldVal}' WHERE discordId=${userid}`).run();
     return;
 }
 
@@ -239,33 +232,35 @@ bot.on('message', message=>{
     
     switch (args[0]){
         case 'config': 
-            if (args.length >=2){
-                switch (args[0]){
+            if (args.length == 3){
+                switch (args[1]){
                     case "-email":
-                        updateField(message, userid, "email", val);
+                        updateField(message, userid, "email", args[2]);
                         break;
 
                     case "-password":
-                        updateField(message, userid, "password", val);
+                        updateField(message, userid, "password", args[2]);
                         break;
 
                     case "-location":
-                        updateField(message, userid, "location", val);
+                        updateField(message, userid, "location", args[2]);
                         break;
 
                     case "-begin":
-                        updateField(message, userid, "begin", val);
+                        updateField(message, userid, "begin", args[2]);
                         break;
 
                     case "-end":
-                        updateField(message, userid, "email", val);
+                        updateField(message, userid, "end", args[2]);
                         break;
 
                     default:
-                        sendFieldErrorMessage(message, args[0]);
-                        break
+                        sendFieldErrorMessage(message, args[2]);
+                        break;
                 }
+                break;
             }
+
             if (args.length!=6){
                 sendHelpMessage(message);
                 break;
