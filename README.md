@@ -20,18 +20,6 @@ Simply add this bot to your discord server by clicking [here](https://discord.co
 ### Join the discord server!
 You can also join my discord server by clicking [here](https://discord.gg/rrb9K42CDU). You can type your commands in the "Book here" text channel. 
 
-# Running the bot on your own
-Install the following dependencies
-```sh 
-pip install selenium
-pip install webdriver-manager
-```
-Start the discord bot
-```sh 
-node discord-bot.js
-```
-If you want the bot to stay online, keep the program running in the background.
-
 *  *  *  *  *
 
 ## Commands
