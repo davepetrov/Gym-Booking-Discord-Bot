@@ -13,24 +13,14 @@ This bot was originally a personal project, but with Canada opening in the follo
 *  *  *  *  *
 
 # How to use the bot 
+
 ### Add it to your server!
 Simply add this bot to your discord server by clicking [here](https://discord.com/api/oauth2/authorize?client_id=812832537516310568&permissions=0&scope=bot)
-###### *Note*: The bot is currently up and running. If there are any issues, please contact me by creating an issue request on GitHub with an attatched screenshot
-
 ### Join the discord server!
 You can also join my discord server by clicking [here](https://discord.gg/rrb9K42CDU). You can type your commands in the "Book here" text channel. 
 
-# Running the bot on your own
-Install the following dependencies
-```sh 
-pip install selenium
-pip install webdriver-manager
-```
-Start the discord bot
-```sh 
-node discord-bot.js
-```
-If you want the bot to stay online, keep the program running in the background.
+###### *Note*: The bot is currently up and running. If there are any issues, please contact me by creating an issue request on GitHub with an attatched screenshot
+
 
 *  *  *  *  *
 
