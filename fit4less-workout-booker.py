@@ -193,7 +193,7 @@ if __name__ == '__main__':
         person = Account(password, email)
 
         options = webdriver.ChromeOptions()
-        # options.add_argument('headless')
+        options.add_argument('headless')
         # options.add_argument('window-size=1920x1080');
         # driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'), options=options)
         driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)

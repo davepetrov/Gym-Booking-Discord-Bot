@@ -37,8 +37,8 @@ If you want the bot to stay online, keep the program running in the background.
 ## Commands
 `!config`
 #### Parameters:
-- Password
 - Email address
+- Password
 - Exact fit4less location
 - Minimum time range to book (24 hour)
 - Maximum time range to book (24 hour)

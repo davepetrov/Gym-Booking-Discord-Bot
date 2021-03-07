@@ -5,6 +5,10 @@ let PREFIX = "!";
 let db = require('better-sqlite3')('./db/fit.db');
 
 function setConfig(message, userid, email, password, location, begin, end){
+
+    if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(begin) || !/^([01]\d|2[0-3]):?([0-5]\d)$/.test(end)){
+        sendFormatErrorMessage(message);
+    }
     console.log("setConfig");
     
     if (!isFit4lessUser(userid)){
@@ -56,6 +60,18 @@ function sendFieldErrorMessage(message, field){
     return;
 }
 
+function sendFormatErrorMessage(message){
+    console.log("sendFieldErrorMessage");
+
+    const msg = new MessageEmbed()
+        .setTitle("ERROR")
+        .setColor(0xff0000)
+        .setDescription(`Your time slot time is in the wrong format. ##:## format is accepted`);
+
+    message.author.send(msg);
+    return;
+}
+
 function sendHelpMessage(message){
     console.log("sendHelpMessage");
 
@@ -90,6 +106,7 @@ function sendDefaultMessage(message){
 }
 
 function isFit4lessUser(discordId){
+    console.log("person: "+discordId);
     const user = db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
     return user!=undefined;
 }
@@ -317,12 +334,13 @@ setInterval(function(){
     var estDate = new Date(datezone - (3600000*5));
 
     //Book at 12:00am EST
-    if(estDate.getHours() === 0 && estDate.getMinutes()===1){ 
-        var toggledUsers = db.prepare("Select * from USER on USER.autobook=1").all();
-        for (var user in toggledUsers){
+    if(estDate.getHours() === 0 && estDate.getMinutes() === 1){ 
+        var toggledUsers = db.prepare("Select * from USER WHERE USER.autobook=1").all();
+        console.log(toggledUsers.length);
+        toggledUsers.forEach(function (user) {
             console.log(`Autobooked for ${user.discordId}`);
-            book(null, user.discordId);
-        }
+            book(null, user.discordId)
+        });
     }
 }, 60000); // Repeat every 60000 milliseconds (1 min)
 
