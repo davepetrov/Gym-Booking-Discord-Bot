@@ -43,6 +43,8 @@ You can also use `!config -{Field} {Value}` to update a particular field in your
 
 
 `!autobook` You can toggle on and off if you want the bot to auto book for you without you having to use the !book command every 3 days. *You need to setup your configuration before calling this command*
+
+<img src="/images/autobook-showcase.png" width="700">
   
 `!reserved`
 Lists all of the current scheduled times. *You need to setup your configuration before calling this command*  

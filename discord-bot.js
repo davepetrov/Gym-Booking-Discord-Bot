@@ -106,7 +106,6 @@ function sendDefaultMessage(message){
 }
 
 function isFit4lessUser(discordId){
-    console.log("person: "+discordId);
     const user = db.prepare(`SELECT * FROM USER WHERE discordId=${discordId}`).get();
     return user!=undefined;
 }
@@ -119,7 +118,7 @@ function book(message, discordId){
 
     var user =  db.prepare('SELECT * FROM USER WHERE discordId='+discordId).get()
 
-    console.log(user.email, user.password);
+    console.log("Performing action on", user.email, user.password);
     if (message!=null){
         console.log("Booking time for user manually");
 
@@ -134,7 +133,7 @@ function book(message, discordId){
         console.log("Booking time for user automatically");
     }
 
-    exec(`python3 fit4less-workout-booker.py book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    exec(`python3 handler.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (message!=null){
                 const msg = new MessageEmbed()
@@ -146,6 +145,9 @@ function book(message, discordId){
             }
             if (error !== null) {
                 console.log('exec error: ' + error);
+            }
+            else{
+                console.log("Booking complete")
             }
     });
     
@@ -167,7 +169,7 @@ function checkReserved(message, discordId){
             .setColor(0xff0000);
         message.author.send(msg);
     }
-    exec(`python3 fit4less-workout-booker.py reserved ${user.password} ${user.email}`,
+    exec(`python3 handler.py fit4less reserved ${user.password} ${user.email}`,
         function (error, stdout, stderr) {
             if (message!=null){
                 const msg = new MessageEmbed()
@@ -178,6 +180,9 @@ function checkReserved(message, discordId){
             }
             if (error !== null) {
                 console.log('exec error: ' + error);
+            }
+            else{
+                console.log("Checking reserved complete")
             }
         });
 }
@@ -334,11 +339,10 @@ setInterval(function(){
     var estDate = new Date(datezone - (3600000*5));
 
     //Book at 12:00am EST
-    if(estDate.getHours() === 0 && estDate.getMinutes() === 1){ 
+    if(estDate.getHours() === 0 && estDate.getMinutes() === 50){ 
         var toggledUsers = db.prepare("Select * from USER WHERE USER.autobook=1").all();
-        console.log(toggledUsers.length);
         toggledUsers.forEach(function (user) {
-            console.log(`Autobooked for ${user.discordId}`);
+            console.log(`\nAutobooking for ${user.discordId}`);
             book(null, user.discordId)
         });
     }
