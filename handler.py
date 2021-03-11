@@ -1,6 +1,6 @@
 # Usage: python3 handler.py [gym] [command] [pass] [email] [location] [minimum time to book] [maximum time to book]
-# Prereq: Times are in militaqry format (##:##)
-#        Commands include: book, reserved, locations
+# Prereq: Times are in military format (##:##)
+#        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
 
 from selenium import webdriver
@@ -85,6 +85,33 @@ class Fit4lessAccount():
         except Exception as e:
             print("Something went wrong with loggin in:" + str(e))
 
+    def isMaxedBook(self, driver): 
+        try:
+            if not elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
+                return False
+
+            if scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
+                return True
+            
+        except Exception as e:
+            print("BookingErr:", str(e))
+
+        return False
+
+    def isClosed(self, driver):
+        try:
+            if not self.login(driver):
+                return True
+
+            if elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
+                title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
+                if title == "Your club is closed":
+                    print("Your gym is closed")
+                    return True
+            return False
+
+        except Exception as e:
+            return False
 
     def bookTime(self, driver):
         alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
@@ -113,23 +140,75 @@ class Fit4lessAccount():
             if minrangetimegym <= timegym <= maxrangetimegym:
 
                 # Book this time
+                sleep(1)
                 booktime = scrollTo(driver, driver.find_element_by_id(time_id))
                 booktime.click()  # Click on the specifc time to book, falling in the time domain we want
 
                 # Accept COVID-19 terms of service
+                sleep(1)
                 driver.find_element_by_id("dialog_book_yes").click()
                 return clock
 
         print()
         return 0
 
-    def book(self, driver, location, minrangetimegym, maxrangetimegym):
-        print('booking')
+    def autobook(self, driver, location, minrangetimegym, maxrangetimegym):
         # 1) Enter https://www.fit4less.ca/ > 2) Book workout
         try:
-            if not self.login(driver):
+
+            if self.isMaxedBook(driver):
+                print("Maximum # of slots booked 1")
                 return
+
+            if not elementByIDExists(driver, 'btn_club_select'):
+                print("Maximum # of slots booked")
+                return
+
+            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element.click()
             
+
+            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(location)):
+                print("Incorrect location, try again")
+                return
+
+            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(location))
+            location_element.click()
+
+
+            # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
+            today = datetime.date.today()
+            dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
+
+            sleep(3)
+            print("last day checking", dayaftertomorrow)
+
+            if not elementByIDExists(driver, 'btn_date_select'):
+                print("Maximum booking for this user")
+                return
+
+            selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+            selectday_element.click()
+            day_element_name = "date_"+dayaftertomorrow
+            driver.find_element_by_id(day_element_name).click()
+
+            booked = self.bookTime(driver)
+            if booked != 0:
+                self.timesbooked[dayaftertomorrow] = booked
+            
+        except Exception as e:
+            print("BookingErr:"+ str(e))
+
+        print(" ")
+        return 1
+
+    def book(self, driver, location, minrangetimegym, maxrangetimegym):
+        # 1) Enter https://www.fit4less.ca/ > 2) Book workout
+        try:
+            if self.isMaxedBook(driver):
+                print("Maximum # of slots booked 1")
+                return
+                
             if not elementByIDExists(driver, 'btn_club_select'):
                 print("Maximum # of slots booked")
                 return
@@ -150,18 +229,27 @@ class Fit4lessAccount():
             today = datetime.date.today()
             tomorrow = today + datetime.timedelta(days=1)
             dayaftertomorrow = today + datetime.timedelta(days=2)
-            days = [today.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d")]  # Book 3 days in advance
-            days = [today.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), dayaftertomorrow.strftime("%Y-%m-%d")]  # Book 3 days in advance
+            days = [dayaftertomorrow.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d")]  # Book 3 days in advance
 
             for i in days:
-                try:
-                    countbooked = driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
-                except:
-                    print("No other timeslots available, Booked {} times".format(self.countbooked))
-                    self.getReserved(driver)
-                    return
+                sleep(3)
+                print("checking", i)
+                # try:
+                #     countbooked = driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
+                # except:
+                #     print("No other timeslots available, Booked {} times".format(self.countbooked))
+                #     return
 
-                self.countbooked = countbooked.text[9]
+                # self.countbooked = countbooked.text[9]
+                continueXpath='/html/body/div[2]/div/div/div/div/div/div'
+                if elementByXpathExists(driver, continueXpath):
+                    print("Daily limit reached")
+                    driver.find_element_by_xpath(continueXpath).click()
+                    sleep(1)
+
+                if not elementByIDExists(driver, 'btn_date_select'):
+                    print("Maximum booking for this user")
+                    return
 
                 selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
                 selectday_element.click()
@@ -171,9 +259,8 @@ class Fit4lessAccount():
                 booked = self.bookTime(driver)
                 if booked != 0:
                     self.timesbooked[i] = booked
+                    print('booked')
             
-            self.getReserved(driver)
-
         except Exception as e:
             print("BookingErr:", str(e))
 
@@ -181,40 +268,22 @@ class Fit4lessAccount():
         return 1
 
     def getReserved(self, driver):
-        print('resrvdd')
-
+    
         try:
-            if not self.login(driver):
-                return 0
             alltimes_elements = driver.find_elements_by_css_selector(".reserved-slots > .time-slot")
+            #reservedSlots=[]
             for i in alltimes_elements:
                 # Very hack-ish, fix in future
-                if i.get_attribute('data-slotdate') == None:
-                    return 0
                 print('-', i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
+                #reservedSlots.add((i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime')))
             
             if len(alltimes_elements)==0:
                 print("No bookings, try picking a different location or changing your available time interval")
-            return
-
+    
         except Exception as e:
-            print("ReserveErr:", +str(e))
-
-
-    def isClosed(self, driver):
-        try:
-            if not self.login(driver):
-                return True
-
-            if elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
-                title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
-                if title == "Your club is closed":
-                    print("Your gym is closed")
-                    return True
-            return False
-
-        except Exception as e:
-            return False
+            print("ReserveErr:", str(e))
+    
+        #return reservedSlots
 
 class LAFitnessAccount():
     '''
@@ -271,7 +340,7 @@ if __name__ == '__main__':
     else: print("Unknown Gym"); sys.exit();
 
     options = webdriver.ChromeOptions()
-    options.add_argument('headless')
+    # options.add_argument('headless')
     # options.add_argument('window-size=1920x1080');
     # driver = webdriver.Chrome(os.path.join(os.getcwd(), 'chromedriver'), options=options)
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
@@ -287,18 +356,26 @@ if __name__ == '__main__':
         end_time = sys.argv[7]
         minrangetimegym = datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
         maxrangetimegym = datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
+        if person.login(driver):
+            person.book(driver, location, minrangetimegym, maxrangetimegym)
+
+    elif function == 'autobook':
+        location = sys.argv[5].replace('-', ' ')
+        start_time = sys.argv[6]
+        end_time = sys.argv[7]
+        minrangetimegym = datetime.datetime.now().replace(hour=int(start_time[:start_time.find(":")],), minute=int(start_time[start_time.find(":")+1:]))
+        maxrangetimegym = datetime.datetime.now().replace(hour=int(end_time[:end_time.find(":")]), minute=int(end_time[end_time.find(":")+1:]))
         
-        person.book(driver, location, minrangetimegym, maxrangetimegym)
-        driver.quit()
-        sys.exit();
+        if person.login(driver):
+            person.autobook(driver, location, minrangetimegym, maxrangetimegym)
 
     elif function == 'reserved':
-        person.getReserved(driver)
-        driver.quit()
-        sys.exit();
+        if person.login(driver):
+            person.getReserved(driver)
 
     else:
         print("Unknown command")
-        driver.quit()
-        sys.exit();
+
+    driver.quit()
+    sys.exit();
 
