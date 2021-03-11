@@ -160,10 +160,12 @@ class Fit4lessAccount():
                 print("Maximum # of slots booked 1")
                 return
 
+            sleep(2)
             if not elementByIDExists(driver, 'btn_club_select'):
                 print("Maximum # of slots booked")
                 return
 
+            sleep(2)
             selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
@@ -208,10 +210,12 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 print("Maximum # of slots booked 1")
                 return
-                
+            sleep(2)
             if not elementByIDExists(driver, 'btn_club_select'):
                 print("Maximum # of slots booked")
                 return
+
+            sleep(2)
 
             selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
@@ -232,7 +236,7 @@ class Fit4lessAccount():
             days = [dayaftertomorrow.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d")]  # Book 3 days in advance
 
             for i in days:
-                sleep(3)
+                sleep(2)
                 print("checking", i)
                 # try:
                 #     countbooked = driver.find_element_by_xpath("/html/body/div[5]/div/div/div/div/form/p[3]")
