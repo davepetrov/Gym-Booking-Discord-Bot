@@ -33,6 +33,7 @@ def elementByXpathExists(driver, xpath):
 def elementByIDExists(driver, id):
     try:
         sleep(0.5)
+
         driver.find_element_by_id(id)
     except NoSuchElementException:
         return False
@@ -41,6 +42,7 @@ def elementByIDExists(driver, id):
 def elementByCssSelectorExists(driver, selector):
     try:
         sleep(0.5)
+
         driver.find_element_by_css_selector(selector)
     except NoSuchElementException:
         return False
@@ -71,12 +73,14 @@ class Fit4lessAccount():
             driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
 
             # Find username/email box, set
-            scrollTo(driver, driver.find_element_by_id('emailaddress')).send_keys(self.getEmailAddress())
+            email = scrollTo(driver, driver.find_element_by_id('emailaddress'))
             email.send_keys(self.getEmailAddress())
             # Find password box, set
-            scrollTo(driver, driver.find_element_by_id('password')).send_keys(self.getPassword())
+            pw = scrollTo(driver, driver.find_element_by_id('password'))
+            pw.send_keys(self.getPassword())
             # Find login button, click
-            scrollTo(driver, driver.find_element_by_id('loginButton')).click()
+            login=scrollTo(driver, driver.find_element_by_id('loginButton'))
+            login.click()
 
             if elementByXpathExists(driver, '/html/body/div[2]/div/div/div/div/h1'):
                 if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
