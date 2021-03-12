@@ -351,7 +351,7 @@ bot.on('guildMemberAdd', member => {
 });
 
 // Autobook for all the users with autobooking toggled on
-// setInterval(function(){
+setInterval(function(){
     console.log("[Checking  autobook...]")
     var date = new Date(); // Create a Date object to find out what time it is
     var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
@@ -365,7 +365,7 @@ bot.on('guildMemberAdd', member => {
             autobook(user.discordId)
         });
    // }
-// }, 6000000); // Repeat every 60000 milliseconds (1 min)
+}, 900000); // Repeat every 60000 milliseconds (1 min)
 
 //Run
 const fs = require('fs');
