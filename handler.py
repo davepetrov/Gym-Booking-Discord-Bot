@@ -24,6 +24,7 @@ def scrollTo(driver, element):
 
 def elementByXpathExists(driver, xpath):
     try:
+        sleep(0.5)
         driver.find_element_by_xpath(xpath)
     except NoSuchElementException:
         return False
@@ -31,6 +32,7 @@ def elementByXpathExists(driver, xpath):
 
 def elementByIDExists(driver, id):
     try:
+        sleep(0.5)
         driver.find_element_by_id(id)
     except NoSuchElementException:
         return False
@@ -38,6 +40,7 @@ def elementByIDExists(driver, id):
 
 def elementByCssSelectorExists(driver, selector):
     try:
+        sleep(0.5)
         driver.find_element_by_css_selector(selector)
     except NoSuchElementException:
         return False
@@ -81,7 +84,7 @@ class Fit4lessAccount():
                     return False
                 return True
             return True
-            
+
         except Exception as e:
             print("Something went wrong with login" + str(e))
 
@@ -90,7 +93,6 @@ class Fit4lessAccount():
             if not elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
                 return False
             
-            sleep(0.5)
             if scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
                 return True
             
@@ -163,16 +165,13 @@ class Fit4lessAccount():
                 print("Maximum # of slots booked 1")
                 return
 
-            sleep(0.5)
             if not elementByIDExists(driver, 'btn_club_select'):
                 print("Maximum # of slots booked")
                 return
 
-            sleep(0.5)
             selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
-
             if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
                 print("Incorrect location, try again")
                 return
@@ -185,7 +184,6 @@ class Fit4lessAccount():
             dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
             print("last day checking", dayaftertomorrow)
 
-            sleep(0.5)
             if not elementByIDExists(driver, 'btn_date_select'):
                 print("Maximum booking for this user")
                 return
@@ -202,7 +200,6 @@ class Fit4lessAccount():
         except Exception as e:
             print("autoBookingErr:"+ str(e))
 
-        print(" ")
         return 1
 
     def book(self, driver):
@@ -211,12 +208,10 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 print("Maximum # of slots booked 1")
                 return
-            sleep(0.5)
+                
             if not elementByIDExists(driver, 'btn_club_select'):
                 print("Maximum # of slots booked")
                 return
-
-            sleep(0.5)
 
             selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
@@ -237,7 +232,6 @@ class Fit4lessAccount():
             days = [dayaftertomorrow.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d")]  # Book 3 days in advance
 
             for i in days:
-                sleep(0.5)
                 print("checking", i)
 
                 # self.countbooked = countbooked.text[9]
@@ -245,7 +239,6 @@ class Fit4lessAccount():
                 if elementByXpathExists(driver, continueXpath):
                     print("Daily limit reached")
                     driver.find_element_by_xpath(continueXpath).click()
-                    sleep(0.5)
 
                 if not elementByIDExists(driver, 'btn_date_select'):
                     print("Maximum booking for this user")
