@@ -4,8 +4,10 @@ const execSync = require('child_process').execSync;
 const exec = require('child_process').exec;
 let PREFIX = "!";
 let db = require('better-sqlite3')('./db/fit.db');
-let dbName="TEST"; // TEST for testing OR USER for deploy
+let dbName="USER"; // TEST for testing OR USER for deploy
 let autobookCount=0
+let autobookSet=0
+
 
 
 // MESSAGES
@@ -81,10 +83,9 @@ function sendDefaultMessage(message, discordId){
 function isUser(discordId){
     const user = db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get();
     if (user==undefined){
-        console.log("not user")
+        console.log("Not a user")
         return false
     }
-    console.log("is user")
     return true
 }
 
@@ -142,9 +143,9 @@ function book(message, discordId){
 
     message.reply(msg); //Public
 
-    execSync(`python3 handler.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    execSync(`python3 handler2.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
-            console.log(stdout)
+            console.log(stderr)
             console.log("Booking complete")
     });
     checkReserved(message,discordId);
@@ -161,12 +162,12 @@ function autobook(discordId){
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get()
     console.log("Performing action on", user.email, user.password);
     
-    exec(`python3 handler.py fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    exec(`python3 handler2.py fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error, stderr);
             }
-            console.log(stdout)
+            console.log(stderr)
             console.log("Auto Booking complete")
     });
 
@@ -184,7 +185,7 @@ function checkReserved(message, discordId){
 
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get();
 
-    exec(`python3 handler.py fit4less reserved ${user.password} ${user.email}`,
+    exec(`python3 handler2.py fit4less reserved ${user.password} ${user.email}`,
         function (error, stdout, stderr) {
             const msg = new MessageEmbed()
                 .setTitle(":grey_exclamation:Future bookings:grey_exclamation:")
@@ -192,7 +193,7 @@ function checkReserved(message, discordId){
                 .setDescription((stdout)+"\n Check your reserved times on the [Fit4less](https://myfit4less.gymmanager.com/portal/booking/index.asp?) site ");
             message.author.send(msg) //private
 
-            console.log(stdout)
+            console.log(stderr)
             console.log("Checking reserved complete")
             
         });
@@ -263,7 +264,7 @@ bot.on('ready', () =>{
 
 // Bot recieves prompt
 bot.on('message', message=>{  
-    console.log("[USER MESSAGE]")
+    console.log("--------------------------------------------------------\n[USER MESSAGE]")
     if (!message.content.startsWith(PREFIX)) return; // Not a command
 
     var username = message.author.username;
@@ -360,7 +361,7 @@ bot.on('guildMemberAdd', member => {
 // Autobook for all the users with autobooking toggled on
 
 // setInterval(function(){
-    console.log(`[Checking  autobook...Autobook count set ${autobookCount}]\n--------------------------------`)
+    console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
     var date = new Date(); // Create a Date object to find out what time it is
     var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
     var estDate = new Date(datezone - (3600000*5));
@@ -371,7 +372,9 @@ bot.on('guildMemberAdd', member => {
         toggledUsers.forEach(function (user) {
             autobook(user.discordId)
         });
-        
+    console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
+    autobookSet+=1;
+
     // }
 // }, 600000); // Repeat every 60000 milliseconds (1 min)
 
