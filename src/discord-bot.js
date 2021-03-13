@@ -2,8 +2,10 @@ const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 const execSync = require('child_process').execSync;
 const exec = require('child_process').exec;
+const fs = require('fs');
+const fetch = require('node-fetch');
 let PREFIX = "!";
-let db = require('better-sqlite3')('./db/fit.db');
+let db = require('better-sqlite3')('db/fit.db');
 let dbName="USER"; // TEST for testing OR USER for deploy
 let autobookCount=0
 let autobookSet=0
@@ -11,8 +13,8 @@ let autobookSet=0
 
 
 // MESSAGES
-function sendConfigErrorMessage(message, discordId){
-    console.log(`[sendConfigErrorMessage] ${discordId}`);
+function sendConfigErrorMessage(message, id){
+    console.log(`[sendConfigErrorMessage] ${id}`);
 
     const msg = new MessageEmbed()
         .setTitle(":question:ERROR:question:")
@@ -23,8 +25,8 @@ function sendConfigErrorMessage(message, discordId){
     return;
 }
 
-function sendFieldErrorMessage(message, discordId, field, value){
-    console.log(`[sendFieldErrorMessage] ${discordId}, ${field}:${value}`);
+function sendFieldErrorMessage(message, id, field, value){
+    console.log(`[sendFieldErrorMessage] ${id}, ${field}:${value}`);
 
     const msg = new MessageEmbed()
         .setTitle(":question:ERROR:question:")
@@ -35,8 +37,8 @@ function sendFieldErrorMessage(message, discordId, field, value){
     return;
 }
 
-function sendFormatErrorMessage(message, discordId){
-    console.log(`[sendFormatErrorMessage] ${discordId}`);
+function sendFormatErrorMessage(message, id){
+    console.log(`[sendFormatErrorMessage] ${id}`);
 
     const msg = new MessageEmbed()
         .setTitle(":question:ERROR:question:")
@@ -47,8 +49,8 @@ function sendFormatErrorMessage(message, discordId){
     return;
 }
 
-function sendHelpMessage(message, discordId){
-    console.log(`[sendHelpMessage] ${discordId}`);
+function sendHelpMessage(message, id){
+    console.log(`[sendHelpMessage] ${id}`);
 
     const msg = new MessageEmbed()
         .setTitle(":question:HELP:question:")
@@ -59,8 +61,8 @@ function sendHelpMessage(message, discordId){
     return;
 }
 
-function sendLocationsMessage(message, discordId){
-    console.log(`[sendLocationsMessage] ${discordId}`);
+function sendLocationsMessage(message, id){
+    console.log(`[sendLocationsMessage] ${id}`);
     let desc = ""
     fs.readFile('my-file.txt', 'utf8', function(err, data) {
         if (err) throw err;
@@ -81,8 +83,8 @@ function sendLocationsMessage(message, discordId){
     message.author.send("Copy the EXACT location (Case sensitive, must include '-') and use that as a location parameter when setting up your configuration. Check !help for more help")
 }
 
-function sendDefaultMessage(message, discordId){
-    console.log(`[sendDefaultMessage] ${discordId}`);
+function sendDefaultMessage(message, id){
+    console.log(`[sendDefaultMessage] ${id}`);
     const msg = new MessageEmbed()
         .setTitle(":grey_question:ERROR:grey_question:")
         .setColor(0xff0000)
@@ -92,31 +94,40 @@ function sendDefaultMessage(message, discordId){
     return;
 }
 
-// HELPERS + COMMANDS
+// HELPER
 
-function isUser(discordId){
-    const user = db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get();
+function isUser(message){
+    let id=message.author.id;
+    let username=message.author.username;
+
+    const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
     if (user==undefined){
         console.log("Not a user")
         return false
     }
+    updateUsername(id, username);
     return true
 }
 
+function updateUsername(id, username){
+    db.prepare(`UPDATE ${dbName} SET username='${username}' WHERE id=${id}`).run()
+}
 
-function setConfig(message, discordId, email, password, location, begin, end){
-    console.log(`[setConfig] ${discordId}`);
+// CONFIG
+
+function setConfig(message, id, email, password, location, begin, end){
+    console.log(`[setConfig] ${id}`);
 
     if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(begin) || !/^([01]\d|2[0-3]):?([0-5]\d)$/.test(end)){
-        sendFormatErrorMessage(discordId, message);
+        sendFormatErrorMessage(id, message);
         return;
     }    
     
-    if (!isUser(discordId)){
+    if (!isUser(message)){
         console.log("Creating entry");
         // add new entry
-        db.prepare(`INSERT INTO ${dbName} (discordId, email, password, location, begin, end) VALUES ('${discordId}', '${email}', '${password}', '${location}', '${begin}', '${end}')`).run();
-        
+        db.prepare(`INSERT INTO ${dbName} (id, email, password, location, begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${begin}', '${end}')`).run();
+
         const msg = new MessageEmbed()
             .setTitle("CONFIG")
             .setColor(0x61bf33)
@@ -126,7 +137,7 @@ function setConfig(message, discordId, email, password, location, begin, end){
     else{
         console.log("Updating entry");
         // update the config
-        db.prepare(`UPDATE ${dbName} SET email='${email}', password='${password}', location='${location}', begin='${begin}', end='${end}' WHERE discordId='${discordId}'`).run();
+        db.prepare(`UPDATE ${dbName} SET email='${email}', password='${password}', location='${location}', begin='${begin}', end='${end}' WHERE id='${id}'`).run();
         
         const msg = new MessageEmbed()
             .setTitle(":muscle:CONFIG:muscle:")
@@ -136,17 +147,43 @@ function setConfig(message, discordId, email, password, location, begin, end){
     }
     return;
 }
+function updateField(message, id, fieldKey, fieldVal){
+    if (!isUser(message)){
+        sendConfigErrorMessage(message, id);
+        return;
+    }
+    
+    if (fieldKey=="begin" || fieldKey=="end"){
+        var time = fieldVal;
+        if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(time)){
+            sendFormatErrorMessage(id, message);
+            return;
+        }
 
+    }
+    console.log(`updating field: ${fieldKey}: ${fieldVal}`);
 
-function book(message, discordId){
-    console.log(`[book] ${discordId}`);
-    if (!isUser(discordId)){
-        sendConfigErrorMessage(discordId, message);
+    const msg = new MessageEmbed()
+        .setTitle("CONFIG")
+        .setColor(0x009cdf) 
+        .setDescription(`Updating your config **${fieldKey}** with **${fieldVal}**`);
+    message.author.send(msg) ;
+
+    db.prepare(`UPDATE ${dbName} SET ${fieldKey}='${fieldVal}' WHERE id=${id}`).run();
+    return;
+}
+
+// MAIN COMMANDS
+
+function book(message, id){
+    console.log(`[book] ${id}`);
+    if (!isUser(id)){
+        sendConfigErrorMessage(message, id);
         console.log("failed to book")
         return;
     }
 
-    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get()
+    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get()
     console.log("Booking time manually");
     console.log("Performing action on", user.email, user.password);
 
@@ -157,26 +194,26 @@ function book(message, discordId){
 
     message.reply(msg); //Public
 
-    execSync(`python3 handler.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    execSync(`python3 -m application fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             console.log(stderr)
             console.log("Booking complete")
     });
-    checkReserved(message,discordId);
+    checkReserved(message,id);
     
 }
 
-function autobook(discordId){
-    console.log(`[Autobook] ${discordId}, count: ${autobookCount}`)
-    if (!isUser(discordId)){
+function autobook(id){
+    console.log(`[Autobook] ${id}, count: ${autobookCount}`)
+    if (!isUser(id)){
         console.log("failed to autobook")
         return;
     }
 
-    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get()
+    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get()
     console.log("Performing action on", user.email, user.password);
     
-    exec(`python3 handler.py fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    exec(`python3 -m application fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error, stderr);
@@ -189,17 +226,17 @@ function autobook(discordId){
     console.log("\n");
 }
 
-function checkReserved(message, discordId){
+function checkReserved(message, id){
     console.log("checkReserved");
-    if (!isUser(discordId)){
-        sendConfigErrorMessage(discordId, message);
+    if (!isUser(message)){
+        sendConfigErrorMessage(message, id);
         console.log("failed to checkReserved")
         return;
     }
 
-    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get();
+    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
 
-    exec(`python3 handler.py fit4less reserved ${user.password} ${user.email}`,
+    exec(`python3 -m application fit4less reserved ${user.password} ${user.email}`,
         function (error, stdout, stderr) {
             const msg = new MessageEmbed()
                 .setTitle(":grey_exclamation:Future bookings:grey_exclamation:")
@@ -213,18 +250,18 @@ function checkReserved(message, discordId){
         });
 }
 
-function autobookToggle(message, discordId){
+function autobookToggle(message, id){
     console.log("autobookToggle")
 
-    if (!isUser(discordId)){
-        sendConfigErrorMessage(discordId, message);
+    if (!isUser(message)){
+        sendConfigErrorMessage(message, id);
         console.log("failed to autobookToggle")
         return;
     }
 
-    var togglevalue =  db.prepare(`SELECT autobook FROM ${dbName} WHERE discordId=${discordId}`).get().autobook;
+    var togglevalue =  db.prepare(`SELECT autobook FROM ${dbName} WHERE id=${id}`).get().autobook;
     var newtogglevalue = (togglevalue===0) ? 1 : 0
-    db.prepare(`UPDATE ${dbName} SET autobook=${newtogglevalue} WHERE discordId=${discordId}`).run();
+    db.prepare(`UPDATE ${dbName} SET autobook=${newtogglevalue} WHERE id=${id}`).run();
 
     console.log(togglevalue, "->", newtogglevalue);
     if (newtogglevalue===0){
@@ -244,36 +281,12 @@ function autobookToggle(message, discordId){
     return;
 }
 
-function updateField(message, discordId, fieldKey, fieldVal){
-    if (!isUser(discordId)){
-        sendConfigErrorMessage(discordId, message);
-        return;
-    }
-    
-    if (fieldKey=="begin" || fieldKey=="end"){
-        var time = fieldVal;
-        if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(time)){
-            sendFormatErrorMessage(discordId, message);
-            return;
-        }
-
-    }
-    console.log(`updating field: ${fieldKey}: ${fieldVal}`);
-
-    const msg = new MessageEmbed()
-        .setTitle("CONFIG")
-        .setColor(0x009cdf) 
-        .setDescription(`Updating your config **${fieldKey}** with **${fieldVal}**`);
-    message.author.send(msg) ;
-
-    db.prepare(`UPDATE ${dbName} SET ${fieldKey}='${fieldVal}' WHERE discordId=${discordId}`).run();
-    return;
-}
 
 // Bot online msg
 bot.on('ready', () =>{
     console.log("Fit4Less Bot is now Online with new updates");
-})
+});
+
 
 // Bot recieves prompt
 bot.on('message', message=>{  
@@ -356,46 +369,48 @@ bot.on('message', message=>{
             sendHelpMessage(message, userid);
             break;
             
-        default:
+            default:
             sendDefaultMessage(message, userid);
-    }  
-})
-
+        }  
+    })
+    
 // Create an event listener for new guild members
 bot.on('guildMemberAdd', member => {
     // Send the message to a designated channel on a server:
-    const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
-    if (!channel) return;
-
-    // Send the message, mentioning the member
-    channel.send(`Welcome to Fit4Less Bot Server, ${member}`);
+    // const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
+    // if (!channel) return;
+    
+    message.author.send(`Welcome to Fit4Less Bot Server, ${member}`);
 });
 
 // Autobook for all the users with autobooking toggled on
 
 // setInterval(function(){
-    console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
-    var date = new Date(); // Create a Date object to find out what time it is
-    var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
-    var estDate = new Date(datezone - (3600000*5));
+    // console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
+    // var date = new Date(); // Create a Date object to find out what time it is
+    // var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
+    // var estDate = new Date(datezone - (3600000*5));
+    
+    // //Book at 12:00am EST
+    // // if(estDate.getHours() === 0 && estDate.getMinutes() === 0){ 
+        //     var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
+        //     toggledUsers.forEach(function (user) {
+            //         autobook(user.id)
+            //     });
+            // console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
+            // autobookSet+=1;
+            
+            // }
+            // }, 600000); // Repeat every 60000 milliseconds (1 min)
+            
+// Run
 
-    //Book at 12:00am EST
-    // if(estDate.getHours() === 0 && estDate.getMinutes() === 0){ 
-        var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
-        toggledUsers.forEach(function (user) {
-            autobook(user.discordId)
-        });
-    console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
-    autobookSet+=1;
-
-    // }
-// }, 600000); // Repeat every 60000 milliseconds (1 min)
-
-//Run
-const fs = require('fs');
-const data = fs.readFileSync('../discord-hidden-key.txt', 'UTF-8');
+const data = fs.readFileSync('resources/discord-hidden-key.txt', 'UTF-8');
 const lines = data.split(/\r?\n/);
 lines.forEach((line) => {
     var token = line;
     bot.login(token);
 });
+    
+                
+                

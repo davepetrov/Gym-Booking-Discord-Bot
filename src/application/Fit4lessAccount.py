@@ -1,5 +1,6 @@
 
-from src.helpers import Browser
+#!/usr/bin/python3
+from .helpers import *
 import sys
 import datetime
 
@@ -30,21 +31,21 @@ class Fit4lessAccount():
 
             # Find username/email box, set
             # sleep(0.5)
-            email = Browser.scrollTo(driver, driver.find_element_by_id('emailaddress'))
+            email = scrollTo(driver, driver.find_element_by_id('emailaddress'))
             # email = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'emailaddress' )))
             email.send_keys(self.getEmailAddress())
 
             # Find password box, set
-            pw = Browser.scrollTo(driver, driver.find_element_by_id('password'))
+            pw = scrollTo(driver, driver.find_element_by_id('password'))
             # pw= WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'password' )))
             pw.send_keys(self.getPassword())
 
             # Find login button, click
-            login=Browser.scrollTo(driver, driver.find_element_by_id('loginButton'))
+            login=scrollTo(driver, driver.find_element_by_id('loginButton'))
             # login = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'loginButton' )))
             login.click()
 
-            if Browser.elementByXpathExists(driver, '/html/body/div[2]/div/div/div/div/h1'):
+            if elementByXpathExists(driver, '/html/body/div[2]/div/div/div/div/h1'):
                 if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
                     print("Incorrect credentials, check again")
                     return False
@@ -56,10 +57,10 @@ class Fit4lessAccount():
 
     def isMaxedBook(self, driver): 
         try:
-            if not Browser.elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
+            if not elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
                 return False
             
-            if Browser.scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
+            if scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
                 print("Unable to book, Maximum # of slots booked",  file=sys.stderr)
                 return True
             
@@ -71,7 +72,7 @@ class Fit4lessAccount():
     def checkDailyLimitReached(self, driver):
         try:
             continueXpath='/html/body/div[2]/div/div/div/div/div/div'
-            if Browser.elementByXpathExists(driver, continueXpath):
+            if elementByXpathExists(driver, continueXpath):
                 print("Daily limit reached", file=sys.stderr)
                 driver.find_element_by_xpath(continueXpath).click()
                 return True
@@ -83,7 +84,7 @@ class Fit4lessAccount():
 
     def isClosed(self, driver):
         try:
-            if Browser.elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
+            if elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
                 title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
                 if title == "Your club is closed":
                     print("Your gym is closed")
@@ -120,7 +121,7 @@ class Fit4lessAccount():
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
                     # Book this time
-                    booktime = Browser.scrollTo(driver, driver.find_element_by_id(time_id))
+                    booktime = scrollTo(driver, driver.find_element_by_id(time_id))
                     booktime.click()  # Click on the specifc time to book, falling in the time domain we want
 
                     # Accept COVID-19 terms of service
@@ -144,10 +145,10 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
-            if not Browser.elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
+            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
                 print("Incorrect location, try again",  file=sys.stderr)
                 return
 
@@ -159,7 +160,7 @@ class Fit4lessAccount():
             dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
             print("Checking", dayaftertomorrow, file=sys.stderr)
 
-            selectday_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+            selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
             selectday_element.click()
             day_element_name = "date_"+dayaftertomorrow
             driver.find_element_by_id(day_element_name).click()
@@ -185,11 +186,11 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
 
-            if not Browser.elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
+            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
                 print("Incorrect location, try again", file=sys.stderr)
                 return
 
@@ -209,7 +210,7 @@ class Fit4lessAccount():
                 if self.isMaxedBook(driver):
                     return
 
-                selectday_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
                 selectday_element.click()
                 day_element_name = "date_" + day
                 driver.find_element_by_id(day_element_name).click()
