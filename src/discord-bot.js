@@ -61,8 +61,22 @@ function sendHelpMessage(message, discordId){
 
 function sendLocationsMessage(message, discordId){
     console.log(`[sendLocationsMessage] ${discordId}`);
+    let desc = ""
+    fs.readFile('my-file.txt', 'utf8', function(err, data) {
+        if (err) throw err;
+        desc+=data+', ';
+    });
+
+    const msg = new MessageEmbed()
+        .setTitle(":question:Locations:question:")
+        .setColor(0xff0000)
+        .setDescription(desc);
+
+    message.author.send(msg);
+    return;
+
     message.author.send("Available Locations", {
-        files:['./locations.txt']
+        files:['../locations.txt']
     });
     message.author.send("Copy the EXACT location (Case sensitive, must include '-') and use that as a location parameter when setting up your configuration. Check !help for more help")
 }
@@ -143,7 +157,7 @@ function book(message, discordId){
 
     message.reply(msg); //Public
 
-    execSync(`python3 handler2.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    execSync(`python3 handler.py fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             console.log(stderr)
             console.log("Booking complete")
@@ -162,7 +176,7 @@ function autobook(discordId){
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get()
     console.log("Performing action on", user.email, user.password);
     
-    exec(`python3 handler2.py fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    exec(`python3 handler.py fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error, stderr);
@@ -185,7 +199,7 @@ function checkReserved(message, discordId){
 
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE discordId=${discordId}`).get();
 
-    exec(`python3 handler2.py fit4less reserved ${user.password} ${user.email}`,
+    exec(`python3 handler.py fit4less reserved ${user.password} ${user.email}`,
         function (error, stdout, stderr) {
             const msg = new MessageEmbed()
                 .setTitle(":grey_exclamation:Future bookings:grey_exclamation:")
@@ -231,7 +245,6 @@ function autobookToggle(message, discordId){
 }
 
 function updateField(message, discordId, fieldKey, fieldVal){
-
     if (!isUser(discordId)){
         sendConfigErrorMessage(discordId, message);
         return;
@@ -380,7 +393,7 @@ bot.on('guildMemberAdd', member => {
 
 //Run
 const fs = require('fs');
-const data = fs.readFileSync('discord-hidden-key.txt', 'UTF-8');
+const data = fs.readFileSync('../discord-hidden-key.txt', 'UTF-8');
 const lines = data.split(/\r?\n/);
 lines.forEach((line) => {
     var token = line;

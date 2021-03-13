@@ -1,53 +1,8 @@
-# Usage: python3 handler.py [gym] [command] [pass] [email] [location] [minimum time to book] [maximum time to book]
-# Prereq: Times are in military format (##:##)
-#        Commands include: book, reserved, locations, autobook
-#        Gyms include 'fit4less', 'lafitness'
 
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException  
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import logging
-from selenium.webdriver.remote.remote_connection import LOGGER
-
-import os
+from src.helpers import Browser
 import sys
-from time import sleep, time
 import datetime
 
-
-def scrollTo(driver, element):
-    driver.execute_script("""arguments[0].scrollIntoView({
-            block: 'center',
-            inline: 'center'
-        });""", element)
-    driver.execute_script("arguments[0].scrollIntoView();", element);
-    return element
-
-def elementByXpathExists(driver, xpath):
-    try:
-        driver.find_element_by_xpath(xpath)
-    except NoSuchElementException:
-        return False
-    return True
-
-def elementByIDExists(driver, id):
-    try:
-        driver.find_element_by_id(id)
-    except NoSuchElementException:
-        return False
-    return True
-
-def elementByCssSelectorExists(driver, selector):
-    try:
-        driver.find_element_by_css_selector(selector)
-    except NoSuchElementException:
-        return False
-    return True
 
 class Fit4lessAccount():
     '''
@@ -75,21 +30,21 @@ class Fit4lessAccount():
 
             # Find username/email box, set
             # sleep(0.5)
-            email = scrollTo(driver, driver.find_element_by_id('emailaddress'))
+            email = Browser.scrollTo(driver, driver.find_element_by_id('emailaddress'))
             # email = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'emailaddress' )))
             email.send_keys(self.getEmailAddress())
 
             # Find password box, set
-            pw = scrollTo(driver, driver.find_element_by_id('password'))
+            pw = Browser.scrollTo(driver, driver.find_element_by_id('password'))
             # pw= WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'password' )))
             pw.send_keys(self.getPassword())
 
             # Find login button, click
-            login=scrollTo(driver, driver.find_element_by_id('loginButton'))
+            login=Browser.scrollTo(driver, driver.find_element_by_id('loginButton'))
             # login = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'loginButton' )))
             login.click()
 
-            if elementByXpathExists(driver, '/html/body/div[2]/div/div/div/div/h1'):
+            if Browser.elementByXpathExists(driver, '/html/body/div[2]/div/div/div/div/h1'):
                 if driver.find_element_by_xpath('/html/body/div[2]/div/div/div/div/h1').text == 'LOG IN FAILED':
                     print("Incorrect credentials, check again")
                     return False
@@ -101,10 +56,10 @@ class Fit4lessAccount():
 
     def isMaxedBook(self, driver): 
         try:
-            if not elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
+            if not Browser.elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
                 return False
             
-            if scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
+            if Browser.scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text=='Maximum personal reservations reached':
                 print("Unable to book, Maximum # of slots booked",  file=sys.stderr)
                 return True
             
@@ -116,7 +71,7 @@ class Fit4lessAccount():
     def checkDailyLimitReached(self, driver):
         try:
             continueXpath='/html/body/div[2]/div/div/div/div/div/div'
-            if elementByXpathExists(driver, continueXpath):
+            if Browser.elementByXpathExists(driver, continueXpath):
                 print("Daily limit reached", file=sys.stderr)
                 driver.find_element_by_xpath(continueXpath).click()
                 return True
@@ -128,7 +83,7 @@ class Fit4lessAccount():
 
     def isClosed(self, driver):
         try:
-            if elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
+            if Browser.elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
                 title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
                 if title == "Your club is closed":
                     print("Your gym is closed")
@@ -165,12 +120,10 @@ class Fit4lessAccount():
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
                     # Book this time
-                    # sleep(0.5)
-                    booktime = scrollTo(driver, driver.find_element_by_id(time_id))
+                    booktime = Browser.scrollTo(driver, driver.find_element_by_id(time_id))
                     booktime.click()  # Click on the specifc time to book, falling in the time domain we want
 
                     # Accept COVID-19 terms of service
-                    # sleep(0.5)
                     driver.find_element_by_id("dialog_book_yes").click()
                     
                     if self.checkDailyLimitReached(driver):
@@ -191,10 +144,10 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
-            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
+            if not Browser.elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
                 print("Incorrect location, try again",  file=sys.stderr)
                 return
 
@@ -206,7 +159,7 @@ class Fit4lessAccount():
             dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
             print("Checking", dayaftertomorrow, file=sys.stderr)
 
-            selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+            selectday_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_date_select'))
             selectday_element.click()
             day_element_name = "date_"+dayaftertomorrow
             driver.find_element_by_id(day_element_name).click()
@@ -232,11 +185,11 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+            selectclub_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_club_select'))
             selectclub_element.click()
             
 
-            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
+            if not Browser.elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
                 print("Incorrect location, try again", file=sys.stderr)
                 return
 
@@ -256,7 +209,7 @@ class Fit4lessAccount():
                 if self.isMaxedBook(driver):
                     return
 
-                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+                selectday_element = Browser.scrollTo(driver, driver.find_element_by_id('btn_date_select'))
                 selectday_element.click()
                 day_element_name = "date_" + day
                 driver.find_element_by_id(day_element_name).click()
@@ -288,135 +241,3 @@ class Fit4lessAccount():
     
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
-            
-class LAFitnessAccount():
-    '''
-    Account associated with LA Fitness account
-    '''
-
-    def __init__(self, password, emailaddress):
-        self.password = password
-        self.email = emailaddress
-        self.countbooked = 0
-        self.timesbooked = {}
-
-    def getPassword(self):
-        return self.password
-
-    def getEmailAddress(self):
-        return self.email
-
-    def login(self, driver):
-        driver.get('https://www.lafitness.com/Pages/login.aspx')
-
-        # Find username/email box, set
-        email = scrollTo(driver, driver.find_element_by_xpath('//*[@title="Username"]'))
-        email.send_keys(self.getEmailAddress())
-
-        # Find password box, set
-        password = scrollTo(driver, driver.find_element_by_xpath('//*[@title="Password"]'))
-        password.send_keys(self.getPassword())
-
-        # Find login button, click
-        login_button = scrollTo(driver, driver.find_element_by_xpath('//*[@value="Sign in"'))
-        login_button.click()
-
-
-    def bookTime(self, driver):
-        pass
-
-    def getReserved(self, driver):
-        pass
-        
-    def isClosed(self, driver):
-        pass
-
-
-
-if __name__ == '__main__':
-
-
-    print("----------------------------------------", file=sys.stderr)
-    start_time = time()
-
-    gym = sys.argv[1]
-    function = sys.argv[2]  # command
-    password = sys.argv[3]
-    email = sys.argv[4]
-
-    LOGGER.setLevel(logging.WARNING)
-
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1920,1080");
-    options.add_argument("--no-sandbox");
-    options.add_argument("--headless");
-    options.add_argument("--disable-gpu");
-    options.add_argument("--disable-crash-reporter");
-    options.add_argument("--disable-extensions");
-    options.add_argument("--disable-in-process-stack-traces");
-    options.add_argument("--disable-logging");
-    options.add_argument("--disable-dev-shm-usage");
-    options.add_argument("--log-level=3");
-    options.add_argument("--output=/dev/null");
-
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, service_log_path='/dev/null')
-    driver.implicitly_wait(60)
-
-    # driver=webdriver.Safari();
-    # driver.maximize_window()
-
-    #driver=webdriver.Firefox();
-
-
-    if (gym=='fit4less'): person = Fit4lessAccount(password, email)
-    elif (gym=='lafitness'): person = LAFitnessAccount(password, email)
-    else: print("Unknown Gym", file=sys.stderr); sys.exit();
-
-    if person.isClosed(driver):
-        driver.quit()
-        sys.exit();
-
-    if function == 'book':
-        person.location = sys.argv[5].replace('-', ' ')
-        person.starttime = sys.argv[6]
-        person.endtime = sys.argv[7]
-
-        print(function, file=sys.stderr)
-        print("timeslot: ", person.starttime, '-',person.endtime, file=sys.stderr)
-        print("location: ", person.location, file=sys.stderr)
-
-        print("email: ", person.email, file=sys.stderr)
-        print("pass:", person.password, file=sys.stderr)
-
-        if person.login(driver):
-            person.book(driver)
-
-    elif function == 'autobook':
-        person.location = sys.argv[5].replace('-', ' ')
-        person.starttime = sys.argv[6]
-        person.endtime = sys.argv[7]
-
-        print(function, file=sys.stderr)
-        print("timeslot :", person.starttime, '-',person.endtime, file=sys.stderr)
-        print("location: ", person.location, file=sys.stderr)
-        print("email: ", person.email, file=sys.stderr)
-        print("pass: ", person.password, file=sys.stderr)
-
-        if person.login(driver):
-            person.autobook(driver)
-
-    elif function == 'reserved':
-        print(function, file=sys.stderr)
-        print("email: ", person.email, file=sys.stderr)
-        print("pass: ", person.password, file=sys.stderr)
-
-        if person.login(driver):
-            person.getReserved(driver)
-
-    else:
-        print("Unknown command", file=sys.stderr)
-
-    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-    driver.quit()
-    sys.exit();
-
