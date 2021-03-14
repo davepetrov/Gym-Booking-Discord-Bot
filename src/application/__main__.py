@@ -6,7 +6,7 @@ import os
 import sys
 from time import sleep, time
 
-# Usage: python3 -m application [gym] [command] [pass] [email] [location] [minimum time to book] [maximum time to book]
+# Usage: python3 -m application [fit4less/lafitness] [command] [pass] [email] [location] [location-backup] [minimum time to book] [maximum time to book]
 # Prereq: Times are in military format (##:##)
 #        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
@@ -45,13 +45,15 @@ if person.isClosed(driver):
 
 if function == 'book':
     person.location = sys.argv[5].replace('-', ' ')
-    person.starttime = sys.argv[6]
-    person.endtime = sys.argv[7]
+    person.locationBackup = sys.argv[6].replace('-', ' ')
+
+    person.starttime = sys.argv[7]
+    person.endtime = sys.argv[8]
 
     print(function, file=sys.stderr)
     print("timeslot: ", person.starttime, '-',person.endtime, file=sys.stderr)
     print("location: ", person.location, file=sys.stderr)
-
+    print("locationBackup: ", person.locationBackup, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass:", person.password, file=sys.stderr)
 
@@ -66,6 +68,7 @@ elif function == 'autobook':
     print(function, file=sys.stderr)
     print("timeslot :", person.starttime, '-',person.endtime, file=sys.stderr)
     print("location: ", person.location, file=sys.stderr)
+    print("locationBackup: ", person.locationBackup, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
 

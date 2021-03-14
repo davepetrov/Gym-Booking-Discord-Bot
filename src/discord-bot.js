@@ -115,18 +115,18 @@ function updateUsername(id, username){
 
 // CONFIG
 
-function setConfig(message, id, email, password, location, begin, end){
+function setConfig(message, id, email, password, location, locationBackup, begin, end){
     console.log(`[setConfig] ${id}`);
 
     if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(begin) || !/^([01]\d|2[0-3]):?([0-5]\d)$/.test(end)){
-        sendFormatErrorMessage(id, message);
+        sendFormatErrorMessage(message, id);
         return;
     }    
     
     if (!isUser(message)){
         console.log("Creating entry");
         // add new entry
-        db.prepare(`INSERT INTO ${dbName} (id, email, password, location, begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${begin}', '${end}')`).run();
+        db.prepare(`INSERT INTO ${dbName} (id, email, password, location, locationBackup begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`).run();
 
         const msg = new MessageEmbed()
             .setTitle("CONFIG")
@@ -137,7 +137,7 @@ function setConfig(message, id, email, password, location, begin, end){
     else{
         console.log("Updating entry");
         // update the config
-        db.prepare(`UPDATE ${dbName} SET email='${email}', password='${password}', location='${location}', begin='${begin}', end='${end}' WHERE id='${id}'`).run();
+        db.prepare(`UPDATE ${dbName} SET email='${email}', password='${password}', location='${location}', locationBackup='${locationBackup}', begin='${begin}', end='${end}' WHERE id='${id}'`).run();
         
         const msg = new MessageEmbed()
             .setTitle(":muscle:CONFIG:muscle:")
@@ -147,6 +147,7 @@ function setConfig(message, id, email, password, location, begin, end){
     }
     return;
 }
+
 function updateField(message, id, fieldKey, fieldVal){
     if (!isUser(message)){
         sendConfigErrorMessage(message, id);
@@ -156,7 +157,7 @@ function updateField(message, id, fieldKey, fieldVal){
     if (fieldKey=="begin" || fieldKey=="end"){
         var time = fieldVal;
         if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(time)){
-            sendFormatErrorMessage(id, message);
+            sendFormatErrorMessage(message, id);
             return;
         }
 
@@ -294,8 +295,8 @@ bot.on('message', message=>{
     if (!message.content.startsWith(PREFIX)) return; // Not a command
 
     var username = message.author.username;
-    console.log("username:"+username)
     var userid = message.author.id;
+    console.log("username:"+username)
     console.log("userid:"+userid)
 
     let args = message.content.substring(PREFIX.length).split(" ");
@@ -319,6 +320,10 @@ bot.on('message', message=>{
                         updateField(message, userid, "location", configValue);
                         break;
 
+                    case "-locationBackup":
+                        updateField(message, userid, "locationBackup", configValue);
+                        break;
+
                     case "-begin":
                         updateField(message, userid, "begin", configValue);
                         break;
@@ -334,16 +339,17 @@ bot.on('message', message=>{
                 break;
             }
 
-            if (args.length!=6){
+            if (args.length!=7){
                 sendHelpMessage(message);
                 break;
             }
             var email =  args[1];
             var password =  args[2];
             var location =  args[3];
-            var begin =  args[4];
-            var end =  args[5];
-            setConfig(message, userid, email, password, location, begin, end);
+            var locationBackup =  args[4];
+            var begin =  args[5];
+            var end =  args[6];
+            setConfig(message, userid, email, password, location, locationBackup, begin, end);
             break;
             
         case 'autobook':

@@ -4,7 +4,7 @@ from .helpers import *
 import sys
 import datetime
 
-
+MAX_RESERVATIONS=2;
 class Fit4lessAccount():
     '''
     Account associated with fit4less account
@@ -15,9 +15,11 @@ class Fit4lessAccount():
         self.email = emailaddress
         self.countbooked = 0
         self.timesbooked = {}
+        self.timesReserved = 0
         self.starttime=None
         self.endtime=None
         self.location=None
+        self.locationBackup=None;
 
     def getPassword(self):
         return self.password
@@ -97,6 +99,7 @@ class Fit4lessAccount():
 
     def bookTime(self, driver):
         try:
+
             alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
 
             if len(alltimes_elements) == 0:
@@ -167,13 +170,16 @@ class Fit4lessAccount():
 
             # while not (datetime.datetime.now().hour==0 and datetime.datetime.now().minute>=57 and datetime.datetime.now().second>0):
             #     pass 
-
-            booked = self.bookTime(driver)
-            if booked:
-                self.timesbooked[dayaftertomorrow] = booked
-                print("Booked for", dayaftertomorrow,  file=sys.stderr)
-            else:
-                print("Unable to book, all time slots taken for ", dayaftertomorrow,  file=sys.stderr)
+            for loc in [self.location, self.locationBackup]:
+                booked = self.bookTime(driver)
+                if booked:
+                    self.timesbooked[dayaftertomorrow] = booked
+                    print("Booked for", dayaftertomorrow,  file=sys.stderr)
+                    break
+                else:
+                    print("Unable to book, all time slots taken for ", dayaftertomorrow, "at", loc,  file=sys.stderr)
+                if not self.locationBackup:
+                    break
 
         except Exception as e:
             print("autoBookingError:"+ str(e), file=sys.stderr)
@@ -229,11 +235,11 @@ class Fit4lessAccount():
         return
 
     def getReserved(self, driver):
-
         try:
             # sleep(0.5)
             alltimes_elements = driver.find_elements_by_css_selector(".reserved-slots > .time-slot")
             for i in alltimes_elements:
+                self.timesReserved+=1;
                 print('-', i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
             
             if len(alltimes_elements)==0:
@@ -242,3 +248,7 @@ class Fit4lessAccount():
     
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
+        
+        return self.timesReserved
+
+    
