@@ -22,7 +22,7 @@ email = sys.argv[4]
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080");
 options.add_argument("--no-sandbox");
-options.add_argument("--headless");
+# options.add_argument("--headless");
 options.add_argument("--disable-gpu");
 options.add_argument("--disable-crash-reporter");
 options.add_argument("--disable-extensions");
@@ -33,20 +33,17 @@ options.add_argument("--log-level=3");
 options.add_argument("--output=/dev/null");
 
 driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, service_log_path='/dev/null')
-driver.implicitly_wait(5)
 
 if (gym=='fit4less'): person = Fit4lessAccount(password, email)
 # elif (gym=='lafitness'): person = LAFitnessAccount(password, email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
 
-if person.isClosed(driver):
-    driver.quit()
-    sys.exit();
 
 if function == 'book':
+    driver.implicitly_wait(5)
+
     person.location = sys.argv[5].replace('-', ' ')
     person.locationBackup = sys.argv[6].replace('-', ' ')
-
     person.starttime = sys.argv[7]
     person.endtime = sys.argv[8]
 
@@ -56,14 +53,17 @@ if function == 'book':
     print("locationBackup: ", person.locationBackup, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass:", person.password, file=sys.stderr)
-
+    if person.locationBackup=='null': person.locationBackup=None;
+    
     if person.login(driver):
         person.book(driver)
 
 elif function == 'autobook':
+    driver.implicitly_wait(5)
     person.location = sys.argv[5].replace('-', ' ')
-    person.starttime = sys.argv[6]
-    person.endtime = sys.argv[7]
+    person.locationBackup = sys.argv[6].replace('-', ' ')
+    person.starttime = sys.argv[7]
+    person.endtime = sys.argv[8]
 
     print(function, file=sys.stderr)
     print("timeslot :", person.starttime, '-',person.endtime, file=sys.stderr)
@@ -72,10 +72,15 @@ elif function == 'autobook':
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
 
+    if person.locationBackup=='null': person.locationBackup=None;
     if person.login(driver):
         person.autobook(driver)
 
 elif function == 'reserved':
+    if person.isClosed(driver):
+        driver.quit()
+        sys.exit();
+
     print(function, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
@@ -83,10 +88,21 @@ elif function == 'reserved':
     if person.login(driver):
         person.getReserved(driver)
 
+elif function == 'login':
+    print(function, file=sys.stderr)
+    print("email: ", person.email, file=sys.stderr)
+    print("pass: ", person.password, file=sys.stderr)
+    
+    code=person.login(driver);
+    print("code: ", code, file=sys.stderr)
+    if code:
+        sys.exit()
+    sys.exit(1)
+
 else:
     print("Unknown command", file=sys.stderr)
 
 print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-driver.quit()
-sys.exit();
+#driver.quit()
+#sys.exit();
 

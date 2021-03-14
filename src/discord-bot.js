@@ -63,26 +63,22 @@ function sendHelpMessage(message, id){
 
 function sendLocationsMessage(message, id){
     console.log(`[sendLocationsMessage] ${id}`);
-    let desc = ""
-    fs.readFile('my-file.txt', 'utf8', function(err, data) {
-        if (err) throw err;
-        desc+=data+', ';
-    });
 
     const msg = new MessageEmbed()
         .setTitle(":question:Locations:question:")
         .setColor(0xff0000)
-        .setDescription(desc);
+        .setDescription("Copy the EXACT location (Case sensitive, must include '-') and use that as a location parameter when setting up your configuration. Check !help for more help");
+
 
     message.author.send(msg);
-    return;
 
-    message.author.send("Available Locations", {
-        files:['../locations.txt']
+    message.author.send({
+        files:['./resources/locations.txt']
     });
-    message.author.send("Copy the EXACT location (Case sensitive, must include '-') and use that as a location parameter when setting up your configuration. Check !help for more help")
+    return;
 }
 
+    
 function sendDefaultMessage(message, id){
     console.log(`[sendDefaultMessage] ${id}`);
     const msg = new MessageEmbed()
@@ -109,19 +105,72 @@ function isUser(message){
     return true
 }
 
+function isValidLocation(message, location){
+    const validLocations=[]
+    const data = fs.readFileSync('./resources/locations.txt', 'UTF-8');
+    const lines = data.split(/\r?\n/);
+    lines.forEach((line) => {
+        validLocations.push(line);
+    });
+
+    if (!validLocations.includes(location)){
+        console.log("invalid location")
+        const msg = new MessageEmbed()
+            .setTitle(":grey_exclamation:CONFIG:grey_exclamation:")
+            .setColor(0x009cdf)
+            .setDescription('Invalid Fit4less location, location remains the same');
+        message.author.send(msg); 
+        return false
+    }
+
+    return true
+}
+
 function updateUsername(id, username){
     db.prepare(`UPDATE ${dbName} SET username='${username}' WHERE id=${id}`).run()
 }
 
-// CONFIG
+function isValidLogin(message, email, password){
+    try{
+        prog=execSync(`python3 -m application fit4less login ${password} ${email}`);
+    }
+    catch(error){
+        console.log("login failed")
+        const msg = new MessageEmbed()
+            .setTitle(":grey_exclamation:CONFIG:grey_exclamation:")
+            .setColor(0x009cdf)
+            .setDescription('Invalid Fit4less login, login remains the same');
+        message.author.send(msg); 
+        
+        return false
+    }
+    return true
+}
 
+function isValidTime(message, begin, end){
+    if (!(/^([01]\d|2[0-3]):?([0-5]\d)$/.test(begin) && /^([01]\d|2[0-3]):?([0-5]\d)$/.test(end))){
+        sendFormatErrorMessage(message, message.author.id);
+        return false
+    }
+    return true
+
+}
+// CONFIG
 function setConfig(message, id, email, password, location, locationBackup, begin, end){
     console.log(`[setConfig] ${id}`);
 
-    if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(begin) || !/^([01]\d|2[0-3]):?([0-5]\d)$/.test(end)){
+    if (!isValidTime(message, begin, end)){
         sendFormatErrorMessage(message, id);
         return;
     }    
+
+    if (!isValidLogin(message, email, password)){
+        return;
+    }
+
+    if (!isValidLocation(message, location) || !isValidLocation(message, locationBackup)){
+        return;
+    }
     
     if (!isUser(message)){
         console.log("Creating entry");
@@ -129,9 +178,9 @@ function setConfig(message, id, email, password, location, locationBackup, begin
         db.prepare(`INSERT INTO ${dbName} (id, email, password, location, locationBackup, begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`).run();
 
         const msg = new MessageEmbed()
-            .setTitle("CONFIG")
+            .setTitle(":muscle:CONFIG:muscle:")
             .setColor(0x61bf33)
-            .setDescription('Setting up new config for you. *You can now use !book to book*');
+            .setDescription('**Creating** new config for you. *You can now use !book to book*');
         message.author.send(msg); 
     }
     else{
@@ -142,7 +191,7 @@ function setConfig(message, id, email, password, location, locationBackup, begin
         const msg = new MessageEmbed()
             .setTitle(":muscle:CONFIG:muscle:")
             .setColor(0x009cdf)
-            .setDescription('Updating your existing config. *You can now use !book to book*');
+            .setDescription('**Updating** your existing config. *You can now use !book to book*');
         message.author.send(msg); 
     }
     return;
@@ -153,11 +202,14 @@ function updateField(message, id, fieldKey, fieldVal){
         sendConfigErrorMessage(message, id);
         return;
     }
+
+    if (fieldKey=="location"){
+
+    }
     
     if (fieldKey=="begin" || fieldKey=="end"){
         var time = fieldVal;
-        if (!/^([01]\d|2[0-3]):?([0-5]\d)$/.test(time)){
-            sendFormatErrorMessage(message, id);
+        if (!isValidTime(time, time)){
             return;
         }
 
@@ -185,23 +237,29 @@ function book(message, id){
     }
 
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get()
+
     console.log("Booking time manually");
     console.log("Performing action on", user.email, user.password);
 
     const msg = new MessageEmbed()
     .setTitle(`:muscle:Booking:muscle:`)
     .setColor(0xff0000)
-    .setDescription((`Checking Fit4less for available times, this may take a few seconds \nBooking set for  ${message.author.username} at ${user.location}`));
+    .setDescription((`Checking Fit4less for available times, this may take a few seconds \nBooking set for  ${message.author.username} at ${user.location}/ ${user.locationBackup}`));
 
     message.reply(msg); //Public
-
-    execSync(`python3 -m application fit4less book ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+    if (user.locationBackup==null){
+        locationBackup='null'
+    }
+    else{
+        locationBackup=user.locationBackup;
+    }
+    execSync(`python3 -m application fit4less book ${user.password} ${user.email} ${user.location} ${locationBackup} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             console.log(stderr)
             console.log("Booking complete")
     });
     checkReserved(message,id);
-    
+    return;
 }
 
 function autobook(id){

@@ -52,10 +52,12 @@ class Fit4lessAccount():
                     print("Incorrect credentials, check again")
                     return False
                 return True
-            return True
 
         except Exception as e:
             print("LoginError" + str(e))
+            return False
+
+        return True
 
     def isMaxedBook(self, driver): 
         try:
@@ -148,16 +150,6 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
-            selectclub_element.click()
-            
-            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
-                print("Incorrect location, try again",  file=sys.stderr)
-                return
-
-            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(self.location))
-            location_element.click()
-
             # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
             today = datetime.date.today()
             dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
@@ -168,13 +160,26 @@ class Fit4lessAccount():
             day_element_name = "date_"+dayaftertomorrow
             driver.find_element_by_id(day_element_name).click()
 
-            # while not (datetime.datetime.now().hour==0 and datetime.datetime.now().minute>=57 and datetime.datetime.now().second>0):
-            #     pass 
             for loc in [self.location, self.locationBackup]:
+                print("Checking", loc,  file=sys.stderr)
+
+                selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+                selectclub_element.click()
+                
+                if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(loc)):
+                    print("Incorrect location, try again",  file=sys.stderr)
+                    return
+
+                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
+                location_element.click()
+
+                while not (datetime.datetime.now().hour>=23 and datetime.datetime.now().minute>=1056 and datetime.datetime.now().second>0):
+                    pass 
+
                 booked = self.bookTime(driver)
                 if booked:
                     self.timesbooked[dayaftertomorrow] = booked
-                    print("Booked for", dayaftertomorrow,  file=sys.stderr)
+                    print("Booked for", dayaftertomorrow, "at", loc, file=sys.stderr)
                     break
                 else:
                     print("Unable to book, all time slots taken for ", dayaftertomorrow, "at", loc,  file=sys.stderr)
@@ -192,17 +197,6 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
-            selectclub_element.click()
-            
-
-            if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(self.location)):
-                print("Incorrect location, try again", file=sys.stderr)
-                return
-
-            location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(self.location))
-            location_element.click()
-
 
             # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
             today = datetime.date.today()
@@ -210,27 +204,45 @@ class Fit4lessAccount():
             dayaftertomorrow = today + datetime.timedelta(days=2)
             days = [dayaftertomorrow.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d")]  # Book 3 days in advance
 
-            for day in days:
-                print("Checking", day,  file=sys.stderr)
-
+            for loc in [self.location, self.locationBackup]:
                 if self.isMaxedBook(driver):
                     return
 
-                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
-                selectday_element.click()
-                day_element_name = "date_" + day
-                driver.find_element_by_id(day_element_name).click()
+                print("Checking", loc,  file=sys.stderr)
 
-                booked = self.bookTime(driver)
-                if booked:
-                    self.timesbooked[dayaftertomorrow] = booked
-                    print("Booked for", dayaftertomorrow,  file=sys.stderr)
-                else:
-                    print("Unable to book, all time slots taken for ", dayaftertomorrow,  file=sys.stderr)
+                selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
+                selectclub_element.click()
+                
+                if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(loc)):
+                    print("Incorrect location, try again", file=sys.stderr)
+                    return
 
+                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
+                location_element.click()
+
+                for day in days:
+                    print("Checking", day,  file=sys.stderr)
+
+                    if self.isMaxedBook(driver):
+                        return
+
+                    selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+                    selectday_element.click()
+                    day_element_name = "date_" + day
+                    driver.find_element_by_id(day_element_name).click()
+
+                    booked = self.bookTime(driver)
+                    if booked:
+                        self.timesbooked[dayaftertomorrow] = booked
+                        print("Booked for", dayaftertomorrow, "at", loc,  file=sys.stderr)
+                    else:
+                        print("Unable to book, all time slots taken for ", day, "at", loc,  file=sys.stderr)
+                    
+                if not self.locationBackup:
+                    break
             
         except Exception as e:
-            print("BookingError:", str(e), sys.stderr)
+            print("BookingError:", str(e), file=sys.stderr)
 
         return
 

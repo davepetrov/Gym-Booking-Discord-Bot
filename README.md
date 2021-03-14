@@ -38,13 +38,13 @@ This command sets up the configuration with all of your login details, preferred
 
 You can also use `!config -{Field} {Value}` to update a particular field in your configuration. For example, if you want to update your previous email, call `!config -email new@email`. List of available fields include: email, password, location, locationBackup, begin, end
 
-<img src="/images/config1-showcase.png" width="700"> <img src="/images/config2-showcase.png" width="700">
+<img src="/images/config1-showcase.png" width="600"> <img src="/images/config2-showcase.png" width="600">
 
 `!book` In short, this command does all the automated booking, reserving all the times within the specific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location. The user calls the !book command from the server and gets a private message revealing the private login information with all the booked times. *You need to setup your configuration before calling this command*
 
 `!autobook` You can toggle on and off if you want the bot to auto book for you without you having to use the !book command every 3 days. *You need to setup your configuration before calling this command*
 
-<img src="/images/autobook-showcase.png" width="700">
+<img src="/images/autobook-showcase.png" width="600">
 
 `!reserved`
 Lists all of the current scheduled times. *You need to setup your configuration before calling this command*  
