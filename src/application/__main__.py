@@ -22,7 +22,7 @@ email = sys.argv[4]
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080");
 options.add_argument("--no-sandbox");
-# options.add_argument("--headless");
+options.add_argument("--headless");
 options.add_argument("--disable-gpu");
 options.add_argument("--disable-crash-reporter");
 options.add_argument("--disable-extensions");
@@ -54,7 +54,7 @@ if function == 'book':
     print("email: ", person.email, file=sys.stderr)
     print("pass:", person.password, file=sys.stderr)
     if person.locationBackup=='null': person.locationBackup=None;
-    
+
     if person.login(driver):
         person.book(driver)
 
@@ -103,6 +103,6 @@ else:
     print("Unknown command", file=sys.stderr)
 
 print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-#driver.quit()
-#sys.exit();
+driver.quit()
+sys.exit();
 

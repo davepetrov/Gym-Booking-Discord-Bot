@@ -173,8 +173,10 @@ class Fit4lessAccount():
                 location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
                 location_element.click()
 
-                while not (datetime.datetime.now().hour>=23 and datetime.datetime.now().minute>=1056 and datetime.datetime.now().second>0):
+                while not (datetime.datetime.now().hour>=23 and datetime.datetime.now().minute>=20 and datetime.datetime.now().second>35):
                     pass 
+
+                driver.refresh()
 
                 booked = self.bookTime(driver)
                 if booked:

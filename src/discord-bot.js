@@ -105,6 +105,16 @@ function isUser(message){
     return true
 }
 
+function isUserAuto(id){
+
+    const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
+    if (user==undefined){
+        console.log("Not a user")
+        return false
+    }
+    return true
+}
+
 function isValidLocation(message, location){
     const validLocations=[]
     const data = fs.readFileSync('./resources/locations.txt', 'UTF-8');
@@ -155,6 +165,7 @@ function isValidTime(message, begin, end){
     return true
 
 }
+
 // CONFIG
 function setConfig(message, id, email, password, location, locationBackup, begin, end){
     console.log(`[setConfig] ${id}`);
@@ -198,13 +209,17 @@ function setConfig(message, id, email, password, location, locationBackup, begin
 }
 
 function updateField(message, id, fieldKey, fieldVal){
+    console.log(`[updating field]: ${fieldKey}: ${fieldVal}`);
+
     if (!isUser(message)){
         sendConfigErrorMessage(message, id);
         return;
     }
 
-    if (fieldKey=="location"){
-
+    if (fieldKey=="location" || fieldKey=="locationBackup"){
+        if (!isValidLocation(message, fieldVal)){
+            return;
+        }
     }
     
     if (fieldKey=="begin" || fieldKey=="end"){
@@ -214,8 +229,6 @@ function updateField(message, id, fieldKey, fieldVal){
         }
 
     }
-    console.log(`updating field: ${fieldKey}: ${fieldVal}`);
-
     const msg = new MessageEmbed()
         .setTitle("CONFIG")
         .setColor(0x009cdf) 
@@ -242,9 +255,9 @@ function book(message, id){
     console.log("Performing action on", user.email, user.password);
 
     const msg = new MessageEmbed()
-    .setTitle(`:muscle:Booking:muscle:`)
-    .setColor(0xff0000)
-    .setDescription((`Checking Fit4less for available times, this may take a few seconds \nBooking set for  ${message.author.username} at ${user.location}/ ${user.locationBackup}`));
+        .setTitle(`:muscle:Booking:muscle:`)
+        .setColor(0xff0000)
+        .setDescription((`Checking Fit4less for available times, this may take a few seconds \nBooking set for  ${message.author.username} at ${user.location}/ ${user.locationBackup}`));
 
     message.reply(msg); //Public
     if (user.locationBackup==null){
@@ -264,15 +277,22 @@ function book(message, id){
 
 function autobook(id){
     console.log(`[Autobook] ${id}, count: ${autobookCount}`)
-    if (!isUser(message)){
+    if (!isUserAuto(id)){
         console.log("failed to autobook")
         return;
     }
 
     var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get()
     console.log("Performing action on", user.email, user.password);
-    
-    exec(`python3 -m application fit4less autobook ${user.password} ${user.email} ${user.location} ${user.begin} ${user.end}`,
+
+    if (user.locationBackup==null){
+        locationBackup='null'
+    }
+    else{
+        locationBackup=user.locationBackup;
+    }
+
+    exec(`python3 -m application fit4less autobook ${user.password} ${user.email} ${user.location} ${locationBackup} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             if (error !== null) {
                 console.log('exec error: ' + error, stderr);
@@ -450,21 +470,28 @@ bot.on('guildMemberAdd', member => {
 // Autobook for all the users with autobooking toggled on
 
 // setInterval(function(){
-    // console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
-    // var date = new Date(); // Create a Date object to find out what time it is
-    // var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
-    // var estDate = new Date(datezone - (3600000*5));
+
+
+
+
+    console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
+    var date = new Date(); // Create a Date object to find out what time it is
+    var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
+    var estDate = new Date(datezone - (3600000*5));
     
-    // //Book at 12:00am EST
-    // // if(estDate.getHours() === 0 && estDate.getMinutes() === 0){ 
-        //     var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
-        //     toggledUsers.forEach(function (user) {
-            //         autobook(user.id)
-            //     });
-            // console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
-            // autobookSet+=1;
-            
-            // }
+    //Book at 12:00am EST
+    // if(estDate.getHours() === 0 && estDate.getMinutes() === 0){ 
+        var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
+        toggledUsers.forEach(function (user) {
+                autobook(user.id)
+            });
+        console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
+        autobookSet+=1;
+
+
+        
+        
+        // }
             // }, 600000); // Repeat every 60000 milliseconds (1 min)
             
 // Run
