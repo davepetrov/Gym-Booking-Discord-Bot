@@ -126,7 +126,7 @@ function setConfig(message, id, email, password, location, locationBackup, begin
     if (!isUser(message)){
         console.log("Creating entry");
         // add new entry
-        db.prepare(`INSERT INTO ${dbName} (id, email, password, location, locationBackup begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`).run();
+        db.prepare(`INSERT INTO ${dbName} (id, email, password, location, locationBackup, begin, end) VALUES ('${id}', '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`).run();
 
         const msg = new MessageEmbed()
             .setTitle("CONFIG")
@@ -178,7 +178,7 @@ function updateField(message, id, fieldKey, fieldVal){
 
 function book(message, id){
     console.log(`[book] ${id}`);
-    if (!isUser(id)){
+    if (!isUser(message)){
         sendConfigErrorMessage(message, id);
         console.log("failed to book")
         return;
@@ -206,7 +206,7 @@ function book(message, id){
 
 function autobook(id){
     console.log(`[Autobook] ${id}, count: ${autobookCount}`)
-    if (!isUser(id)){
+    if (!isUser(message)){
         console.log("failed to autobook")
         return;
     }
