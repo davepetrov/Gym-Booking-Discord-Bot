@@ -1,8 +1,5 @@
 ![Gym-Booking-Discord-Bot](https://socialify.git.ci/davepetrov/Gym-Booking-Discord-Bot/image?description=1&font=Inter&language=1&owner=1&pattern=Diagonal%20Stripes&theme=Light)
 
-# ANNOUNCEMENT
-`A new version of the bot is coming out on Friday Evening. Features include automated booking with toggle switch, Saved ENCRYPTED config so you wouldnt need to constantly type your login when you use the !book and !reserved commands. `
-
 *  *  *  *  *
 
 ## Description
