@@ -19,7 +19,7 @@ function sendConfigErrorMessage(message, id){
     const msg = new MessageEmbed()
         .setTitle(":question:ERROR:question:")
         .setColor(0xff0000)
-        .setDescription('Dont forget to setup your configuration using !config');
+        .setDescription('Dont forget to setup your configuration using !config [email] [password] [location] [backup location] [start time] [end time]');
 
     message.author.send(msg);
     return;
@@ -127,7 +127,7 @@ function isValidLocation(message, location){
         console.log("invalid location")
         const msg = new MessageEmbed()
             .setTitle(":grey_exclamation:CONFIG:grey_exclamation:")
-            .setColor(0x009cdf)
+            .setColor(0xff0000)
             .setDescription('Invalid Fit4less location, location remains the same');
         message.author.send(msg); 
         return false
@@ -145,7 +145,7 @@ function isValidLogin(message, email, password){
         prog=execSync(`python3 -m application fit4less login ${password} ${email}`);
     }
     catch(error){
-        console.log("login failed")
+        console.log("newlogin failed")
         const msg = new MessageEmbed()
             .setTitle(":grey_exclamation:CONFIG:grey_exclamation:")
             .setColor(0x009cdf)
@@ -166,7 +166,25 @@ function isValidTime(message, begin, end){
 
 }
 
+
 // CONFIG
+function getConfig(message, id){
+    console.log(`[getConfig] ${id}`);
+    if (!isUser(message)){
+        sendConfigErrorMessage(message);
+        return;
+    }
+
+    var user =  db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
+    const msg = new MessageEmbed()
+        .setTitle(":muscle:CONFIG:muscle:")
+        .setColor(0x61bf33)
+        .setDescription(`**Email**: ${user.email}\n**Password**: ${user.password}\n**Location**: ${user.location}\n**Backup Location**: ${user.locationBackup}\n**Timeslots**: ${user.begin} - ${user.end}\n`);
+    message.author.send(msg); 
+    return;
+
+}
+
 function setConfig(message, id, email, password, location, locationBackup, begin, end){
     console.log(`[setConfig] ${id}`);
 
@@ -205,6 +223,8 @@ function setConfig(message, id, email, password, location, locationBackup, begin
             .setDescription('**Updating** your existing config. *You can now use !book to book*');
         message.author.send(msg); 
     }
+
+    getConfig(message, id);
     return;
 }
 
@@ -236,6 +256,9 @@ function updateField(message, id, fieldKey, fieldVal){
     message.author.send(msg) ;
 
     db.prepare(`UPDATE ${dbName} SET ${fieldKey}='${fieldVal}' WHERE id=${id}`).run();
+
+    getConfig(message, id);
+
     return;
 }
 
@@ -322,7 +345,7 @@ function checkReserved(message, id){
                 .setColor(0xffa500)
                 .setDescription((stdout)+"\n Check your reserved times on the [Fit4less](https://myfit4less.gymmanager.com/portal/booking/index.asp?) site ");
             message.author.send(msg) //private
-
+            console.log(stdout)
             console.log(stderr)
             console.log("Checking reserved complete")
             
@@ -369,8 +392,8 @@ bot.on('ready', () =>{
 
 // Bot recieves prompt
 bot.on('message', message=>{  
-    console.log("--------------------------------------------------------\n[USER MESSAGE]")
     if (!message.content.startsWith(PREFIX)) return; // Not a command
+    console.log("--------------------------------------------------------\n[USER MESSAGE]")
 
     var username = message.author.username;
     var userid = message.author.id;
@@ -382,6 +405,10 @@ bot.on('message', message=>{
     
     switch (command){
         case 'config': 
+            if (args.length ==1){
+                getConfig(message, userid);
+                break;
+            }
             if (args.length == 3){
                 let configKey=args[1];
                 let configValue=args[2];
@@ -418,7 +445,7 @@ bot.on('message', message=>{
             }
 
             if (args.length!=7){
-                sendHelpMessage(message);
+                sendHelpMessage(message, userid);
                 break;
             }
             var email =  args[1];
@@ -469,30 +496,17 @@ bot.on('guildMemberAdd', member => {
 
 // Autobook for all the users with autobooking toggled on
 
-// setInterval(function(){
-
-
-
-
+setInterval(function(){
     console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`)
-    var date = new Date(); // Create a Date object to find out what time it is
-    var datezone = date.getTime() + (date.getTimezoneOffset() * 60000);
-    var estDate = new Date(datezone - (3600000*5));
     
-    //Book at 12:00am EST
-    // if(estDate.getHours() === 0 && estDate.getMinutes() === 0){ 
-        var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
-        toggledUsers.forEach(function (user) {
-                autobook(user.id)
-            });
-        console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
-        autobookSet+=1;
+    var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
+    toggledUsers.forEach(function (user) {
+            autobook(user.id)
+        });
+    console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`)
+    autobookSet+=1;
 
-
-        
-        
-        // }
-            // }, 600000); // Repeat every 60000 milliseconds (1 min)
+}, 1800000); // Repeat every 60000 milliseconds (1 min)
             
 // Run
 

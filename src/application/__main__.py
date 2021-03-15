@@ -11,7 +11,7 @@ from time import sleep, time
 #        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
 
-print("----------------------------------------", file=sys.stderr)
+print("         -------------------------------", file=sys.stderr)
 start_time = time()
 
 gym = sys.argv[1]
@@ -40,7 +40,7 @@ else: print("Unknown Gym", file=sys.stderr); sys.exit();
 
 
 if function == 'book':
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(2)
 
     person.location = sys.argv[5].replace('-', ' ')
     person.locationBackup = sys.argv[6].replace('-', ' ')
@@ -75,11 +75,13 @@ elif function == 'autobook':
     if person.locationBackup=='null': person.locationBackup=None;
     if person.login(driver):
         person.autobook(driver)
+    else:
+        print("NOT LOGGED IN", file=sys.stderr)
 
 elif function == 'reserved':
-    if person.isClosed(driver):
-        driver.quit()
-        sys.exit();
+    # if person.isClosed(driver):
+    #     driver.quit()
+    #     sys.exit();
 
     print(function, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
@@ -102,7 +104,8 @@ elif function == 'login':
 else:
     print("Unknown command", file=sys.stderr)
 
+print(time(), file=sys.stderr)
 print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-driver.quit()
-sys.exit();
+#driver.quit()
+#sys.exit();
 

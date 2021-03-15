@@ -1,11 +1,12 @@
 
 #!/usr/bin/python3
 from .helpers import *
+from .Account import Account
 import sys
 import datetime
 
 MAX_RESERVATIONS=2;
-class Fit4lessAccount():
+class Fit4lessAccount(Account):
     '''
     Account associated with fit4less account
     '''
@@ -54,7 +55,7 @@ class Fit4lessAccount():
                 return True
 
         except Exception as e:
-            print("LoginError" + str(e))
+            print("LoginError" + str(e), sys.stderr)
             return False
 
         return True
@@ -99,7 +100,7 @@ class Fit4lessAccount():
         
         return False
 
-    def bookTime(self, driver):
+    def _bookTime(self, driver):
         try:
 
             alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
@@ -150,16 +151,6 @@ class Fit4lessAccount():
             if self.isMaxedBook(driver):
                 return
 
-            # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
-            today = datetime.date.today()
-            dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
-            print("Checking", dayaftertomorrow, file=sys.stderr)
-
-            selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
-            selectday_element.click()
-            day_element_name = "date_"+dayaftertomorrow
-            driver.find_element_by_id(day_element_name).click()
-
             for loc in [self.location, self.locationBackup]:
                 print("Checking", loc,  file=sys.stderr)
 
@@ -173,12 +164,22 @@ class Fit4lessAccount():
                 location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
                 location_element.click()
 
-                while not (datetime.datetime.now().hour>=23 and datetime.datetime.now().minute>=20 and datetime.datetime.now().second>35):
-                    pass 
+                # while not (datetime.datetime.now().hour==0 and datetime.datetime.now().minute>=0 and datetime.datetime.now().second>20):
+                #     pass 
 
-                driver.refresh()
+                # driver.refresh()
 
-                booked = self.bookTime(driver)
+                # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
+                today = datetime.date.today()
+                dayaftertomorrow = (today + datetime.timedelta(days=2)).strftime("%Y-%m-%d")
+                print("Checking", dayaftertomorrow, file=sys.stderr)
+
+                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
+                selectday_element.click()
+                day_element_name = "date_"+dayaftertomorrow
+                driver.find_element_by_id(day_element_name).click()
+
+                booked = self._bookTime(driver)
                 if booked:
                     self.timesbooked[dayaftertomorrow] = booked
                     print("Booked for", dayaftertomorrow, "at", loc, file=sys.stderr)
@@ -198,7 +199,6 @@ class Fit4lessAccount():
         try:
             if self.isMaxedBook(driver):
                 return
-
 
             # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
             today = datetime.date.today()
@@ -233,7 +233,7 @@ class Fit4lessAccount():
                     day_element_name = "date_" + day
                     driver.find_element_by_id(day_element_name).click()
 
-                    booked = self.bookTime(driver)
+                    booked = self._bookTime(driver)
                     if booked:
                         self.timesbooked[dayaftertomorrow] = booked
                         print("Booked for", dayaftertomorrow, "at", loc,  file=sys.stderr)

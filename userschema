@@ -1,0 +1,10 @@
+CREATE TABLE TEST(
+    username VARCHAR(100),
+    id   VARCHAR(100)    NOT NULL,
+    email       VARCHAR(100)    NOT NULL,
+    password    VARCHAR(100)    NOT NULL,
+    location    VARCHAR(100)    NOT NULL,
+    begin       VARCHAR(5)      NOT NULL,
+    end         VARCHAR(5)      NOT NULL,
+    autobook    BIT             DEFAULT 0
+);
