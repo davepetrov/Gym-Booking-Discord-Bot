@@ -15,6 +15,7 @@ class Fit4lessAccount(Account):
     def __init__(self, password, emailaddress):
         self.password = password
         self.email = emailaddress
+        self.function = ''
         self.countbooked = 0
         self.timesbooked = {}
         self.timesReserved = 0
@@ -145,58 +146,10 @@ class Fit4lessAccount(Account):
 
         return False
 
-    def autobook(self, driver):
-        # 1) Enter https://www.fit4less.ca/ > 2) Book workout
-        try:
-            if self.isMaxedBook(driver):
-                return 3
-
-            for loc in [self.location, self.locationBackup]:
-                print("Checking", loc,  file=sys.stderr)
-
-                selectclub_element = scrollTo(driver, driver.find_element_by_id('btn_club_select'))
-                selectclub_element.click()
-
-                if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(loc)):
-                    print("Incorrect location, try again",  file=sys.stderr)
-                    return 4
-
-                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
-                location_element.click()
-
-                # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
-                today = datetime.date.today()
-                todayAfter72hour = (today + datetime.timedelta(days=3)).strftime("%Y-%m-%d")
-                print("Checking", todayAfter72hour, file=sys.stderr)
-
-                selectday_element = scrollTo(driver, driver.find_element_by_id('btn_date_select'))
-                selectday_element.click()
-                day_element_name = "date_"+todayAfter72hour
-                driver.find_element_by_id(day_element_name).click()
-
-                booked = self.__bookTime(driver)
-                if booked:
-                    self.timesbooked[todayAfter72hour] = booked
-                    print("Booked for", todayAfter72hour, "at", loc, file=sys.stderr)
-                else:
-                    print("Unable to book, all time slots taken for ", todayAfter72hour, "at", loc,  file=sys.stderr)
-
-                if not self.locationBackup:
-                    break
-                    
-        except Exception as e:
-            print("autoBookingError:" + str(e), file=sys.stderr)
-            return 127
-
-        if len(self.timesbooked)>0:
-            return 0
-        else: 
-            return 5
-
     def book(self, driver):
-        # 1) Enter https://www.fit4less.ca/ > 2) Book workout
+                # 1) Enter https://www.fit4less.ca/ > 2) Book workout
         try:
-            if self.isClosed():
+            if self.isClosed(driver):
                 return 2
 
             if self.isMaxedBook(driver):
@@ -225,27 +178,35 @@ class Fit4lessAccount(Account):
                 location_element.click()
 
                 for day in days:
-                    print("Checking", day,  file=sys.stderr)
+                    print("Checking", day, file=sys.stderr)
 
                     if self.isMaxedBook(driver):
                         return 3
-
+                    
                     scrollTo(driver, driver.find_element_by_id('btn_date_select')).click()
-                    day_element_name = "date_" + day
-                    driver.find_element_by_id(day_element_name).click()
+                    currentDate = "date_" + day
+                    if not elementByIDExists(driver, currentDate):
+                        driver.find_element_by_id('dialog_date_close').click()
+                        print("     Date not showing", file=sys.stderr)
+                        continue
+                    
+                    driver.find_element_by_id(currentDate).click()
 
                     booked = self.__bookTime(driver)
                     if booked:
                         self.timesbooked[dayaftertomorrow] = booked
-                        print("Booked for", dayaftertomorrow, "at", loc,  file=sys.stderr)
+                        print("     Booked for", dayaftertomorrow, "at", loc,  file=sys.stderr)
+                        if self.function=='autobook':
+                            break
                     else:
-                        print("Unable to book, all time slots taken for ", day, "at", loc,  file=sys.stderr)
+                        print("     Unable to book, all time slots taken for ", day, "at", loc,  file=sys.stderr)
 
                 if not self.locationBackup:
                     break
 
         except Exception as e:
-            print("BookingError:", str(e), file=sys.stderr)
+            if self.function=='autobook': print("AutoBookError:", str(e), file=sys.stderr)
+            else: print("BookingError:", str(e), file=sys.stderr)
             return 127
 
         if len(self.timesbooked)>0:

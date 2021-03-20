@@ -12,8 +12,6 @@ from time import sleep, time
 #        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
 
-start_time = time()
-print(datetime.now(), file=sys.stderr)
 gym = sys.argv[1]
 function = sys.argv[2] 
 password = sys.argv[3]
@@ -35,15 +33,19 @@ options.add_argument("--output=/dev/null");
 chr=ChromeDriverManager().install()
 driver=webdriver.Chrome(options=options)
 
+sys.stdout.flush(); sys.stderr.flush()
+
+start_time = time()
+print(datetime.now(), file=sys.stderr)
+
 if (gym=='fit4less'): person = Fit4lessAccount(password, email)
 # elif (gym=='lafitness'): person = LAFitnessAccount(password, email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
 print(function, file=sys.stderr)
-
+person.function=function
+driver.implicitly_wait(2)
 
 if function == 'book':
-    driver.implicitly_wait(2)
-
     person.location = sys.argv[5].replace('-', ' ')
     person.locationBackup = sys.argv[6].replace('-', ' ')
     person.starttime = sys.argv[7]
@@ -70,8 +72,6 @@ if function == 'book':
     exit(code)
 
 elif function == 'autobook':
-    driver.implicitly_wait(5)
-
     person.location = sys.argv[5].replace('-', ' ')
     person.locationBackup = sys.argv[6].replace('-', ' ')
     person.starttime = sys.argv[7]
@@ -85,7 +85,7 @@ elif function == 'autobook':
 
     if person.locationBackup=='null': person.locationBackup=None;
     if person.login(driver):
-        code=person.autobook(driver)
+        code=person.book(driver)
     else:
         code=1
         print("NOT LOGGED IN", file=sys.stderr)
