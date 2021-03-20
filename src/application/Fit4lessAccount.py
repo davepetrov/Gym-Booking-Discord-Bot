@@ -4,6 +4,7 @@ from .helpers import *
 from .Account import Account
 import sys
 import datetime
+from time import sleep
 
 MAX_RESERVATIONS = 2
 
@@ -168,6 +169,7 @@ class Fit4lessAccount(Account):
                     return 3
 
                 print("Checking", loc,  file=sys.stderr)
+                sleep(2)
                 scrollTo(driver, driver.find_element_by_id('btn_club_select')).click()
 
                 if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(loc)):
@@ -216,7 +218,6 @@ class Fit4lessAccount(Account):
 
     def getReserved(self, driver):
         try:
-            # sleep(0.5)
             alltimes_elements = driver.find_elements_by_css_selector(
                 ".reserved-slots > .time-slot")
             for i in alltimes_elements:
