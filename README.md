@@ -1,8 +1,5 @@
 ![Gym-Booking-Discord-Bot](https://socialify.git.ci/davepetrov/Gym-Booking-Discord-Bot/image?description=1&font=Inter&language=1&owner=1&pattern=Diagonal%20Stripes&theme=Light)
 
-# ANNOUNCEMENT
-`A new version of the bot is coming out on Friday Evening. Features include automated booking with toggle switch, Saved ENCRYPTED config so you wouldnt need to constantly type your login when you use the !book and !reserved commands. `
-
 *  *  *  *  *
 
 ## Description
@@ -38,17 +35,31 @@ This command sets up the configuration with all of your login details, preferred
 
 You can also use `!config -{Field} {Value}` to update a particular field in your configuration. For example, if you want to update your previous email, call `!config -email new@email`. List of available fields include: email, password, location, locationBackup, begin, end
 
-`!book` In short, this command does all the automated booking, reserving all the times within the specific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location. The user calls the !book command from the server and gets a private message revealing the private login information with all the booked times. *You need to setup your configuration before calling this command*
+#### Usage(s):
 
-`!autobook` You can toggle on and off if you want the bot to auto book for you without you having to use the !book command every 3 days. *You need to setup your configuration before calling this command*
+- `!config` *To get the config. You need to setup your configuration before calling this command*
+- `!config [EMAIL] [PASSWORD] [LOCATION] [BACKUP LOCATION] [START TIME] [END TIME]` *To get add/update your entire config*
+- `!config -[FIELD] [VALUE]` *To update a specific field. You need to setup your configuration before calling this command*
+
+
+`!book` 
+
+In short this command does all the automated booking, reserving all the times within the specific time block you give it. Suppose the user is free and wants to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location. The user calls the !book command from the server and gets a private message revealing the private login information with all the booked times. *You need to setup your configuration before calling this command*
+
+`!autobook` 
+
+You can toggle on and off if you want the bot to auto book for you without you having to use the !book command every 3 days. *You need to setup your configuration before calling this command*
 
 `!reserved`
+
 Lists all of the current scheduled times. *You need to setup your configuration before calling this command*  
 
 `!locations`
+
 The bot replies with a list of available locations, the user will copy whichever location into the [location] field when setting up the config.
 
 `!help`
+
 Lists all the commands with short descriptions
 
 *  *  *  *  *
