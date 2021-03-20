@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from datetime import datetime
 from .Fit4lessAccount import Fit4lessAccount
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -11,11 +12,10 @@ from time import sleep, time
 #        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
 
-print("         -------------------------------", file=sys.stderr)
 start_time = time()
-
+print(datetime.now(), file=sys.stderr)
 gym = sys.argv[1]
-function = sys.argv[2]  # command
+function = sys.argv[2] 
 password = sys.argv[3]
 email = sys.argv[4]
 
@@ -32,11 +32,13 @@ options.add_argument("--disable-dev-shm-usage");
 options.add_argument("--log-level=3");
 options.add_argument("--output=/dev/null");
 
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options, service_log_path='/dev/null')
+chr=ChromeDriverManager().install()
+driver=webdriver.Chrome(options=options)
 
 if (gym=='fit4less'): person = Fit4lessAccount(password, email)
 # elif (gym=='lafitness'): person = LAFitnessAccount(password, email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
+print(function, file=sys.stderr)
 
 
 if function == 'book':
@@ -56,16 +58,25 @@ if function == 'book':
     if person.locationBackup=='null': person.locationBackup=None;
 
     if person.login(driver):
-        person.book(driver)
+        code=person.book(driver)
+    else:
+        code=1
+        print("NOT LOGGED IN", file=sys.stderr)
+        
+    print(datetime.now(), file=sys.stderr)
+    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
+    print("         -------------------------------", file=sys.stderr)
+
+    exit(code)
 
 elif function == 'autobook':
     driver.implicitly_wait(5)
+
     person.location = sys.argv[5].replace('-', ' ')
     person.locationBackup = sys.argv[6].replace('-', ' ')
     person.starttime = sys.argv[7]
     person.endtime = sys.argv[8]
 
-    print(function, file=sys.stderr)
     print("timeslot :", person.starttime, '-',person.endtime, file=sys.stderr)
     print("location: ", person.location, file=sys.stderr)
     print("locationBackup: ", person.locationBackup, file=sys.stderr)
@@ -74,38 +85,54 @@ elif function == 'autobook':
 
     if person.locationBackup=='null': person.locationBackup=None;
     if person.login(driver):
-        person.autobook(driver)
+        code=person.autobook(driver)
     else:
+        code=1
         print("NOT LOGGED IN", file=sys.stderr)
 
-elif function == 'reserved':
-    # if person.isClosed(driver):
-    #     driver.quit()
-    #     sys.exit();
+    print(datetime.now(), file=sys.stderr)
+    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
+    print("         -------------------------------", file=sys.stderr)
 
-    print(function, file=sys.stderr)
+    sys.exit(code)
+
+
+elif function == 'reserved':
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
 
     if person.login(driver):
-        person.getReserved(driver)
+        code = person.getReserved(driver)
+    else:
+        code=1
+        print("NOT LOGGED IN", file=sys.stderr)
+        
+    print(datetime.now(), file=sys.stderr)
+    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
+    print("         -------------------------------", file=sys.stderr)
+
+    sys.exit(code)
+    
 
 elif function == 'login':
     print(function, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
     
-    code=person.login(driver);
-    print("code: ", code, file=sys.stderr)
-    if code:
-        sys.exit()
-    sys.exit(1)
+    print(datetime.now(), file=sys.stderr)
+    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
+    print("         -------------------------------", file=sys.stderr)
+
+    sys.exit(person.login(driver))
+
 
 else:
     print("Unknown command", file=sys.stderr)
+    print(datetime.now(), file=sys.stderr)
+    print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
+    print("         -------------------------------", file=sys.stderr)
 
-print(time(), file=sys.stderr)
-print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-#driver.quit()
-#sys.exit();
+    sys.exit(1)
+
+
 
