@@ -31,11 +31,11 @@ class Fit4lessAccount(Account):
 
             # Find username/email box, set
             email = scrollTo(driver, driver.find_element_by_id('emailaddress'))
-            email.send_keys(self.getEmailAddress())
+            email.send_keys(self.email)
 
             # Find password box, set
             pw = scrollTo(driver, driver.find_element_by_id('password'))
-            pw.send_keys(self.getPassword())
+            pw.send_keys(self.password)
 
             # Find login button, click
             login = scrollTo(driver, driver.find_element_by_id('loginButton'))
@@ -48,9 +48,8 @@ class Fit4lessAccount(Account):
                 return 1
 
         except Exception as e:
-            print("LoginError" + str(e), sys.stderr)
-            return 0
-
+            print("LoginError" + str(e), file=sys.stderr)
+            
         return 0
 
     def __isMaxedBook(self, driver):
@@ -88,7 +87,7 @@ class Fit4lessAccount(Account):
 
         return 0
 
-    def bookTime(self, driver):
+    def __bookTime(self, driver):
         try:
             alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
 
@@ -119,7 +118,7 @@ class Fit4lessAccount(Account):
                     driver, driver.find_element_by_id(time_id).click() 
 
                     # Accept COVID-19 terms of service
-                    scrollTo(driver.find_element_by_id("dialog_book_yes")).click()
+                    scrollTo(driver, driver.find_element_by_id("dialog_book_yes")).click()
 
                     if self.__checkDailyLimitReached(driver):
                         return False

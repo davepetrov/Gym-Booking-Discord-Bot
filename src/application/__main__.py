@@ -30,10 +30,7 @@ options.add_argument("--disable-dev-shm-usage");
 options.add_argument("--log-level=3");
 options.add_argument("--output=/dev/null");
 
-chr=ChromeDriverManager().install()
 driver=webdriver.Chrome(options=options)
-
-sys.stdout.flush(); sys.stderr.flush()
 
 start_time = time()
 print(datetime.now(), file=sys.stderr)
@@ -43,7 +40,7 @@ if (gym=='fit4less'): person = Fit4lessAccount(password, email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
 print(function, file=sys.stderr)
 person.function=function
-driver.implicitly_wait(2)
+driver.implicitly_wait(4)
 
 if function == 'book':
     person.location = sys.argv[5].replace('-', ' ')
@@ -69,6 +66,7 @@ if function == 'book':
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
+    driver.quit()
     exit(code)
 
 elif function == 'autobook':
@@ -94,6 +92,7 @@ elif function == 'autobook':
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
+    driver.quit()
     sys.exit(code)
 
 
@@ -111,6 +110,7 @@ elif function == 'reserved':
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
+    driver.quit()
     sys.exit(code)
     
 
@@ -123,6 +123,7 @@ elif function == 'login':
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
+    driver.quit()
     sys.exit(person.login(driver))
 
 
@@ -132,6 +133,7 @@ else:
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
+    driver.quit()
     sys.exit(1)
 
 

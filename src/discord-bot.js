@@ -165,8 +165,12 @@ function updateUsername(id, username) {
 
 function isValidLogin(message, email, password) {
     try {
-        prog = execSync(
-            `python3 -m application fit4less login ${password} ${email}`
+        execSync(`python3 -m application fit4less login ${password} ${email}`,
+            function (error, stdout, stderr) {
+                console.log(stderr);
+                console.log(stdout);
+
+            }
         );
     } catch (error) {
         console.log("newlogin failed");
@@ -322,17 +326,13 @@ function logBookResponse(id, command, status){
     }else if (status==3){
         var desc="Maxed booked"
     }else if (status==4){
-        var desc="Incorrect location"
-    }else if (status==5){
         var desc="No spots available"
     }else if (status==127){
         var desc="API Error"
     }else{
         var desc="Unknown Error"
     }
-    db.prepare(
-        `INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', '${command}', '${status}', '${desc}')`
-    ).run();
+    db.prepare(`INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', '${command}', '${status}', '${desc}')`).run();
 }
 
 function logReservedResponse(id, status){
@@ -343,9 +343,7 @@ function logReservedResponse(id, status){
     }else{
         var desc="Unknown Error"
     }
-    db.prepare(
-        `INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', 'reserved', '${status}', '${desc}')`
-    ).run();
+    db.prepare(`INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', 'reserved', '${status}', '${desc}')`).run();
 }
 // MAIN COMMANDS
 
@@ -406,6 +404,8 @@ function autobook(id) {
     exec(`python3 -m application fit4less autobook ${user.password} ${user.email} ${user.location} ${locationBackup} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
             console.log(stderr);
+            console.log(stdout);
+
             console.log("Auto Booking complete");
         }
     ).on('exit', code => {
@@ -611,10 +611,10 @@ bot.on("guildMemberAdd", (member) => {
 
 // Autobook for all the users with autobooking toggled on
 
-setInterval(function () {
-    var d = new Date();
-    var time = d.getMinutes();
-    if (time==0 || time==30){
+// setInterval(function () {
+//     var d = new Date();
+//     var time = d.getMinutes();
+//     if (time==0 || time==30){
         console.log(
             `[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`
         );
@@ -627,5 +627,5 @@ setInterval(function () {
             `[DONE autobook ${autobookSet}]\n--------------------------------------------------------`
         );
         autobookSet += 1;
-    }
-}, 60000); // Repeat every 60000 milliseconds (1 min)
+//     }
+// }, 60000); // Repeat every 60000 milliseconds (1 min)
