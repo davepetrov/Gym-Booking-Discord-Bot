@@ -9,6 +9,7 @@ const fs = require("fs");
 let PREFIX = "!";
 let db = require("better-sqlite3")("db/fit.db");
 let dbName = "USER"; // TEST for testing OR USER for deploy
+let dbAuditName = "FITBOOKINGS"; 
 let autobookCount = 0;
 let autobookSet = 0;
 
@@ -310,6 +311,42 @@ function updateField(message, id, fieldKey, fieldVal) {
     return;
 }
 
+// LOGGERS
+function logBookResponse(id, command, status){
+    if (status==0){
+        var desc="Successfully booked"
+    }else if (status==1){
+        var desc="Incorrect location"
+    }else if (status==2){
+        var desc="Gym closed"
+    }else if (status==3){
+        var desc="Maxed booked"
+    }else if (status==4){
+        var desc="Incorrect location"
+    }else if (status==5){
+        var desc="No spots available"
+    }else if (status==127){
+        var desc="API Error"
+    }else{
+        var desc="Unknown Error"
+    }
+    db.prepare(
+        `INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', '${command}', '${status}', '${desc}')`
+    ).run();
+}
+
+function logReservedResponse(id, status){
+    if (status==0){
+        var desc="Recieved Reserved response"
+    }else if (status==127){
+        var desc="API Error"
+    }else{
+        var desc="Unknown Error"
+    }
+    db.prepare(
+        `INSERT INTO ${dbAuditName} (fitid, command, status, desc) VALUES ('${id}', 'reserved', '${status}', '${desc}')`
+    ).run();
+}
 // MAIN COMMANDS
 
 function book(message, id) {
@@ -342,10 +379,11 @@ function book(message, id) {
                 console.log("Booking complete");
             }
         );
-        checkReserved(message, id);
-    } catch(error){
+        checkReserve(message, id);
+    } catch(error){d
         console.log('final exit code is', error.status)
         console.log(error.stderr)
+        logBookResponse(id, 'book', error.status)
     }
     return;
 }
@@ -367,13 +405,14 @@ function autobook(id) {
 
     exec(`python3 -m application fit4less autobook ${user.password} ${user.email} ${user.location} ${locationBackup} ${user.begin} ${user.end}`,
         function (error, stdout, stderr) {
-            // if (error !== null) {
-            //     console.log("exec error: " + error);
-            // }
             console.log(stderr);
             console.log("Auto Booking complete");
         }
-    ).on('exit', code => console.log('final exit code is', code));
+    ).on('exit', code => {
+        console.log('final exit code is', code);
+        logBookResponse(id, 'autobook', code)
+
+    });
 
     autobookCount += 1;
     console.log("\n");
@@ -408,7 +447,10 @@ function checkReserved(message, id) {
                 console.log("Checking reserved complete");
             }
         }
-    ).on('exit', code => console.log('final exit code is', code));
+    ).on('exit', code => {
+        console.log('final exit code is', code);
+        logReservedResponse(id, code)
+    });
 }
 
 function autobookToggle(message, id) {
@@ -569,10 +611,10 @@ bot.on("guildMemberAdd", (member) => {
 
 // Autobook for all the users with autobooking toggled on
 
-// setInterval(function () {
+setInterval(function () {
     var d = new Date();
     var time = d.getMinutes();
-    // if (time==0 || time==30){
+    if (time==0 || time==30){
         console.log(
             `[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`
         );
@@ -585,5 +627,5 @@ bot.on("guildMemberAdd", (member) => {
             `[DONE autobook ${autobookSet}]\n--------------------------------------------------------`
         );
         autobookSet += 1;
-    // }
-// }, 60000); // Repeat every 60000 milliseconds (1 min)
+    }
+}, 60000); // Repeat every 60000 milliseconds (1 min)

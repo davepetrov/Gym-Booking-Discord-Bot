@@ -25,12 +25,6 @@ class Fit4lessAccount(Account):
         self.location = None
         self.locationBackup = None
 
-    def getPassword(self):
-        return self.password
-
-    def getEmailAddress(self):
-        return self.email
-
     def login(self, driver):
         try:
             driver.get('https://myfit4less.gymmanager.com/portal/login.asp')
@@ -59,12 +53,9 @@ class Fit4lessAccount(Account):
 
         return 0
 
-    def isMaxedBook(self, driver):
+    def __isMaxedBook(self, driver):
         try:
-            if not elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2'):
-                return 0
-
-            if scrollTo(driver, driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2')).text == 'Maximum personal reservations reached':
+            if elementByXpathExists(driver, '//*[@id="doorPolicyForm"]/h2') and driver.find_element_by_xpath('//*[@id="doorPolicyForm"]/h2').text == 'Maximum personal reservations reached':
                 print("Unable to book, Maximum # of slots booked",  file=sys.stderr)
                 return 1
 
@@ -73,12 +64,11 @@ class Fit4lessAccount(Account):
 
         return 0
 
-    def checkDailyLimitReached(self, driver):
+    def __checkDailyLimitReached(self, driver):
         try:
             continueXpath = '/html/body/div[2]/div/div/div/div/div/div'
-            if elementByXpathExists(driver, continueXpath):
+            if elementByXpathExists(driver, continueXpath) and driver.find_element_by_xpath(continueXpath).click():
                 print("Daily limit reached", file=sys.stderr)
-                driver.find_element_by_xpath(continueXpath).click()
                 return 1
 
         except Exception as e:
@@ -86,11 +76,10 @@ class Fit4lessAccount(Account):
 
         return 0
 
-    def isClosed(self, driver):
+    def __isClosed(self, driver):
         try:
             if elementByXpathExists(driver, "/html/body/div[2]/div/div/div/div/h1"):
-                title = driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text
-                if title == "Your club is closed":
+                if driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text == "Your club is closed":
                     print("Your gym is closed")
                     return 1
 
@@ -99,16 +88,16 @@ class Fit4lessAccount(Account):
 
         return 0
 
-    def __bookTime(self, driver):
+    def bookTime(self, driver):
         try:
-
-            alltimes_elements = driver.find_elements_by_css_selector(
-                ".available-slots > .time-slot")
+            alltimes_elements = driver.find_elements_by_css_selector(".available-slots > .time-slot")
 
             if len(alltimes_elements) == 0:
                 return False
 
             for time in alltimes_elements:
+                
+                #Do time stuff UGLY UGLY UGLY
                 clock = time.get_attribute("data-slottime")[3::]
                 time_id = time.get_attribute("id")
                 index_of_colon = clock.find(':')
@@ -117,10 +106,8 @@ class Fit4lessAccount(Account):
                 hour += int(clock[:index_of_colon])
                 minute = int(clock[index_of_colon+1:index_of_space])
                 if clock[-2:] == "PM":
-                    if hour == 12:
-                        pass
-                    else:
-                        hour += 12
+                    if hour == 12: pass
+                    else: hour += 12
                 elif clock[-2:] == "AM" and hour == 12:
                     hour = 0
 
@@ -129,16 +116,15 @@ class Fit4lessAccount(Account):
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
                     # Book this time
-                    scrollTo(driver, driver.find_element_by_id(time_id)).click() # Click on the specifc time to book, falling in the time domain we want
+                    driver, driver.find_element_by_id(time_id).click() 
 
                     # Accept COVID-19 terms of service
-                    driver.find_element_by_id("dialog_book_yes").click()
+                    scrollTo(driver.find_element_by_id("dialog_book_yes")).click()
 
-                    if self.checkDailyLimitReached(driver):
+                    if self.__checkDailyLimitReached(driver):
                         return False
 
-                    print('   ', minrangetimegym.strftime("%H:%M"), '<=', timegym.strftime(
-                        "%H:%M"), '<=', maxrangetimegym.strftime("%H:%M"),  file=sys.stderr)
+                    print('   ', minrangetimegym.strftime("%H:%M"), '<=', timegym.strftime("%H:%M"), '<=', maxrangetimegym.strftime("%H:%M"),  file=sys.stderr)
                     print("Booking for "+timegym.strftime("%H:%M"), file=sys.stderr)
                     return True
 
@@ -148,42 +134,39 @@ class Fit4lessAccount(Account):
         return False
 
     def book(self, driver):
-                # 1) Enter https://www.fit4less.ca/ > 2) Book workout
+        # 1) Enter https://www.fit4less.ca/ > 2) Book workout
         try:
-            if self.isClosed(driver):
+            if self.__isClosed(driver):
                 return 2
 
-            if self.isMaxedBook(driver):
+            if self.__isMaxedBook(driver):
                 return 3
 
-            # 5) Select Day: Ex: Tomorrow. Check todays date, select tomorrows date (Maximum of 3 days in advance)
             today = datetime.date.today()
             tomorrow = today + datetime.timedelta(days=1)
             dayaftertomorrow = today + datetime.timedelta(days=2)
             dayafteraftertomorrow = today + datetime.timedelta(days=3)
-
             days = [dayafteraftertomorrow.strftime("%Y-%m-%d"), dayaftertomorrow.strftime("%Y-%m-%d"), tomorrow.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d")]  # Book 3 days in advance
 
             for loc in [self.location, self.locationBackup]:
-                if self.isMaxedBook(driver):
+                if self.__isMaxedBook(driver):
                     return 3
 
                 print("Checking", loc,  file=sys.stderr)
                 sleep(2)
-                scrollTo(driver, driver.find_element_by_id('btn_club_select')).click()
+                driver.find_element_by_id('btn_club_select').click()
 
                 if not elementByXpathExists(driver, "//div[contains(text(),'{}')]".format(loc)):
                     print("Incorrect location, try again", file=sys.stderr)
                     return 1
 
-                location_element = driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc))
-                location_element.click()
+                # Select location
+                driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc)).click()
 
                 for day in days:
                     print("Checking", day, file=sys.stderr)
 
-                    if self.isMaxedBook(driver):
-                        return 3
+                    if self.__isMaxedBook(driver): return 3
                     
                     scrollTo(driver, driver.find_element_by_id('btn_date_select')).click()
                     currentDate = "date_" + day
@@ -214,7 +197,7 @@ class Fit4lessAccount(Account):
         if len(self.timesbooked)>0:
             return 0
         else: 
-            return 5
+            return 4
 
     def getReserved(self, driver):
         try:
@@ -224,7 +207,6 @@ class Fit4lessAccount(Account):
                 print('-', i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
 
             if len(alltimes_elements) == 0:
-                print("No bookings, try picking a different location or changing your available time interval", file=sys.stderr)
                 print("No bookings, try picking a different location or changing your available time interval", file=sys.stdout)
 
         except Exception as e:
