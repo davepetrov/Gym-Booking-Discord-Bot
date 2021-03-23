@@ -354,20 +354,20 @@ function book(message, id) {
         console.log("failed to book");
         return;
     }
-
+    
     var user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
-
-    console.log("Booking time manually");
-    console.log("Performing action on", user.email, user.password);
-
+    
     const msg = new MessageEmbed()
         .setTitle(`:muscle:Booking:muscle:`)
         .setColor(0xff0000)
         .setDescription(
             `Checking Fit4less for available times, this may take a few seconds \nBooking set for  ${message.author.username} at ${user.location}/ ${user.locationBackup}`
         );
-
     message.reply(msg); //Public
+
+    console.log("Booking time manually");
+    console.log("Performing action on", user.email, user.password);
+
     locationBackup= (user.locationBackup==null) ? "null" : user.locationBackup
 
     try{
@@ -378,11 +378,14 @@ function book(message, id) {
             }
         );
         checkReserve(message, id);
-    } catch(error){d
-        console.log('final exit code is', error.status)
-        console.log(error.stderr)
-        logBookResponse(id, 'book', error.status)
+    } catch(error){
+        console.log('final exit code is', error.status);
+        console.log(error.stderr);
+        logBookResponse(id, 'book', error.status);
     }
+
+    checkReserved(message, id);
+
     return;
 }
 
@@ -611,10 +614,10 @@ bot.on("guildMemberAdd", (member) => {
 
 // Autobook for all the users with autobooking toggled on
 
-// setInterval(function () {
-//     var d = new Date();
-//     var time = d.getMinutes();
-//     if (time==0 || time==30){
+setInterval(function () {
+    var d = new Date();
+    var time = d.getMinutes();
+    if (time==0 || time==15|| time==30 || time==45){
         console.log(
             `[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`
         );
@@ -627,5 +630,5 @@ bot.on("guildMemberAdd", (member) => {
             `[DONE autobook ${autobookSet}]\n--------------------------------------------------------`
         );
         autobookSet += 1;
-//     }
-// }, 60000); // Repeat every 60000 milliseconds (1 min)
+    }
+}, 60000); // Repeat every 60000 milliseconds (1 min)
