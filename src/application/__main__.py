@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from datetime import datetime
 from .Fit4lessAccount import Fit4lessAccount
+from .LaFitnessAccount import LaFitnessAccount
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import os
@@ -35,10 +36,11 @@ driver=webdriver.Chrome(options=options)
 start_time = time()
 print(datetime.now(), file=sys.stderr)
 
-if (gym=='fit4less'): person = Fit4lessAccount(password, email)
-# elif (gym=='lafitness'): person = LAFitnessAccount(password, email)
+if (gym=='fit4less'): person = Fit4lessAccount(driver, password, email)
+elif (gym=='lafitness'): person = LaFitnessAccount(driver, password, email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
-print(function, file=sys.stderr)
+
+print("function: ", function, file=sys.stderr)
 person.function=function
 driver.implicitly_wait(4)
 
@@ -48,7 +50,6 @@ if function == 'book':
     person.starttime = sys.argv[7]
     person.endtime = sys.argv[8]
 
-    print(function, file=sys.stderr)
     print("timeslot: ", person.starttime, '-',person.endtime, file=sys.stderr)
     print("location: ", person.location, file=sys.stderr)
     print("locationBackup: ", person.locationBackup, file=sys.stderr)
@@ -56,8 +57,8 @@ if function == 'book':
     print("pass:", person.password, file=sys.stderr)
     if person.locationBackup=='null': person.locationBackup=None;
 
-    if person.login(driver):
-        code=person.book(driver)
+    if person.login():
+        code=person.book()
     else:
         code=1
         print("NOT LOGGED IN", file=sys.stderr)
@@ -82,8 +83,8 @@ elif function == 'autobook':
     print("pass: ", person.password, file=sys.stderr)
 
     if person.locationBackup=='null': person.locationBackup=None;
-    if person.login(driver):
-        code=person.book(driver)
+    if person.login():
+        code=person.book()
     else:
         code=1
         print("NOT LOGGED IN", file=sys.stderr)
@@ -100,8 +101,8 @@ elif function == 'reserved':
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
 
-    if person.login(driver):
-        code = person.getReserved(driver)
+    if person.login():
+        code = person.getReserved()
     else:
         code=1
         print("NOT LOGGED IN", file=sys.stderr)
@@ -112,19 +113,25 @@ elif function == 'reserved':
 
     driver.quit()
     sys.exit(code)
-    
+
 
 elif function == 'login':
-    print(function, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
+
+    login=person.login()
     
+    if login==0:
+        code=1
+    else:
+        code=0
+
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
-    sys.exit(person.login(driver))
+    sys.exit(code)
 
 
 else:
