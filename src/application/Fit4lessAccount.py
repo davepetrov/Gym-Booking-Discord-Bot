@@ -8,7 +8,6 @@ from time import sleep
 from selenium import webdriver
 
 MAX_RESERVATIONS = 2
-
 class Fit4lessAccount(Account):
     '''
     Account associated with fit4less account
@@ -137,6 +136,9 @@ class Fit4lessAccount(Account):
     def book(self):
         # 1) Enter https://www.fit4less.ca/ > 2) Book workout
         try:
+            if not self.login():
+                return 5
+
             if self.__isClosed():
                 return 2
 
@@ -196,7 +198,7 @@ class Fit4lessAccount(Account):
         except Exception as e:
             if self.function=='autobook': print("AutoBookError:", str(e), file=sys.stderr)
             else: print("BookingError:", str(e), file=sys.stderr)
-            return 127
+            return 500
 
         if len(self.timesbooked)>0:
             return 0
@@ -205,6 +207,9 @@ class Fit4lessAccount(Account):
 
     def getReserved(self):
         try:
+            if not self.login():
+                return 5
+
             alltimes_elements = self.driver.find_elements_by_css_selector(".reserved-slots > .time-slot")
             for i in alltimes_elements:
                 print('-', i.get_attribute('data-slotdate'), i.get_attribute('data-slotclub'), i.get_attribute('data-slottime'))
@@ -214,6 +219,6 @@ class Fit4lessAccount(Account):
 
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
-            return 127
+            return 500
 
         return 0

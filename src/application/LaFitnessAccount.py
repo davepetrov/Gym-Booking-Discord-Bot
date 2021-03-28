@@ -55,14 +55,13 @@ class LaFitnessAccount(Account):
 
 
     def book(self):
-        # 1) Enter https://www.fit4less.ca/ > 2) Book workout
         try:
             pass
 
         except Exception as e:
             if self.function=='autobook': print("AutoBookError:", str(e), file=sys.stderr)
             else: print("BookingError:", str(e), file=sys.stderr)
-            return 127
+            return 500
 
 
     def getReserved(self):
@@ -71,5 +70,5 @@ class LaFitnessAccount(Account):
 
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
-            return 127
+            return 500
         return 0

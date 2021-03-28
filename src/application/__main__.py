@@ -13,6 +13,17 @@ from time import sleep, time
 #        Commands include: book, reserved, locations, autobook
 #        Gyms include 'fit4less', 'lafitness'
 
+# Errorcodes: 
+# 0 : Success
+# 1 : Invalid location
+# 2 : Gym closed
+# 3 : Max booked
+# 4 : Was able to check for bookings without running into errors but unable to booking
+# 4 : Not logged in 
+# 500: Api error
+# 400: User error
+
+
 gym = sys.argv[1]
 function = sys.argv[2] 
 password = sys.argv[3]
@@ -55,14 +66,10 @@ if function == 'book':
     print("locationBackup: ", person.locationBackup, file=sys.stderr)
     print("email: ", person.email, file=sys.stderr)
     print("pass:", person.password, file=sys.stderr)
-    if person.locationBackup=='null': person.locationBackup=None;
 
-    if person.login():
-        code=person.book()
-    else:
-        code=1
-        print("NOT LOGGED IN", file=sys.stderr)
-        
+    if person.locationBackup=='null': person.locationBackup=None;
+    code=person.book()
+
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
@@ -83,11 +90,7 @@ elif function == 'autobook':
     print("pass: ", person.password, file=sys.stderr)
 
     if person.locationBackup=='null': person.locationBackup=None;
-    if person.login():
-        code=person.book()
-    else:
-        code=1
-        print("NOT LOGGED IN", file=sys.stderr)
+    code=person.book()
 
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
@@ -101,12 +104,8 @@ elif function == 'reserved':
     print("email: ", person.email, file=sys.stderr)
     print("pass: ", person.password, file=sys.stderr)
 
-    if person.login():
-        code = person.getReserved()
-    else:
-        code=1
-        print("NOT LOGGED IN", file=sys.stderr)
-        
+    code = person.getReserved()
+
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
     print("         -------------------------------", file=sys.stderr)
@@ -120,11 +119,7 @@ elif function == 'login':
     print("pass: ", person.password, file=sys.stderr)
 
     login=person.login()
-    
-    if login==0:
-        code=1
-    else:
-        code=0
+    code = 1 if login==0 else 0
 
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
@@ -141,7 +136,7 @@ else:
     print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
-    sys.exit(1)
+    sys.exit(400)
 
 
 

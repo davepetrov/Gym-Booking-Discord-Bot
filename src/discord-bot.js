@@ -327,7 +327,7 @@ function logBookResponse(id, command, status){
         var desc="Maxed booked"
     }else if (status==4){
         var desc="No spots available"
-    }else if (status==127){
+    }else if (status==500){
         var desc="API Error"
     }else{
         var desc="Unknown Error"
@@ -338,7 +338,7 @@ function logBookResponse(id, command, status){
 function logReservedResponse(id, status){
     if (status==0){
         var desc="Recieved Reserved response"
-    }else if (status==127){
+    }else if (status==500){
         var desc="API Error"
     }else{
         var desc="Unknown Error"
