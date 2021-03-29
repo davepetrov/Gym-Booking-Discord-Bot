@@ -315,8 +315,19 @@ function updateField(message, id, fieldKey, fieldVal) {
     return;
 }
 
+
+
 // LOGGERS
 function logBookResponse(id, command, status){
+    // # Errorcodes: 
+    // # 0 : Success
+    // # 1 : Invalid location
+    // # 2 : Gym closed
+    // # 3 : Max booked
+    // # 4 : Was able to check for bookings without running into errors but unable to booking
+    // # 4 : Not logged in 
+    // # 500: Api error
+    // # 400: User error
     if (status==0){
         var desc="Successfully booked"
     }else if (status==1){
@@ -336,6 +347,10 @@ function logBookResponse(id, command, status){
 }
 
 function logReservedResponse(id, status){
+    // # Errorcodes: 
+    // # 0 : Success
+    // # 500: Api error
+    // # 400: User error
     if (status==0){
         var desc="Recieved Reserved response"
     }else if (status==500){
@@ -494,11 +509,6 @@ function autobookToggle(message, id) {
     return;
 }
 
-// Bot online msg
-bot.on("ready", () => {
-    console.log("Fit4Less Bot is now Online with new updates");
-});
-
 // Bot recieves prompt
 bot.on("message", (message) => {
     if (!message.content.startsWith(PREFIX)) return; // Not a command
@@ -612,23 +622,30 @@ bot.on("guildMemberAdd", (member) => {
     message.author.send(`Welcome to Fit4Less Bot Server, ${member}`);
 });
 
+
+
 // Autobook for all the users with autobooking toggled on
+
+function autobookTrigger(){
+    console.log(`[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`);
+
+    var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
+    toggledUsers.forEach(function (user) {
+        autobook(user.id);
+    });
+    console.log(`[DONE autobook ${autobookSet}]\n--------------------------------------------------------`);
+    autobookSet += 1;
+}
+// Bot online msg
+bot.on("ready", () => {
+    console.log("Fit4Less Bot is now Online with new updates");
+    autobookTrigger();
+});
 
 setInterval(function () {
     var d = new Date();
     var time = d.getMinutes();
     if (time==0 || time==15|| time==30 || time==45){
-        console.log(
-            `[Checking  autobook...Autobook count set ${autobookSet}]\n--------------------------------------------------------`
-        );
-
-        var toggledUsers = db.prepare(`Select * from ${dbName} WHERE ${dbName}.autobook=1`).all();
-        toggledUsers.forEach(function (user) {
-            autobook(user.id);
-        });
-        console.log(
-            `[DONE autobook ${autobookSet}]\n--------------------------------------------------------`
-        );
-        autobookSet += 1;
+        autobookTrigger();
     }
 }, 60000); // Repeat every 60000 milliseconds (1 min)

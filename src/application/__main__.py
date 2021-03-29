@@ -19,7 +19,7 @@ from time import sleep, time
 # 2 : Gym closed
 # 3 : Max booked
 # 4 : Was able to check for bookings without running into errors but unable to booking
-# 4 : Not logged in 
+# 5 : Not logged in 
 # 500: Api error
 # 400: User error
 
@@ -32,7 +32,7 @@ email = sys.argv[4]
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080");
 options.add_argument("--no-sandbox");
-options.add_argument("--headless");
+# options.add_argument("--headless");
 options.add_argument("--disable-gpu");
 options.add_argument("--disable-crash-reporter");
 options.add_argument("--disable-extensions");
@@ -42,18 +42,20 @@ options.add_argument("--disable-dev-shm-usage");
 options.add_argument("--log-level=3");
 options.add_argument("--output=/dev/null");
 
-driver=webdriver.Chrome(options=options)
 
 start_time = time()
 print(datetime.now(), file=sys.stderr)
 
-if (gym=='fit4less'): person = Fit4lessAccount(driver, password, email)
-elif (gym=='lafitness'): person = LaFitnessAccount(driver, password, email)
+if (gym=='fit4less'): person = Fit4lessAccount(password=password, email=email); options.add_argument("--headless");
+elif (gym=='lafitness'): person = LaFitnessAccount(password=password, email=email)
 else: print("Unknown Gym", file=sys.stderr); sys.exit();
+
+driver=webdriver.Chrome(options=options)
+person.driver=driver
 
 print("function: ", function, file=sys.stderr)
 person.function=function
-driver.implicitly_wait(4)
+driver.implicitly_wait(5)
 
 if function == 'book':
     person.location = sys.argv[5].replace('-', ' ')

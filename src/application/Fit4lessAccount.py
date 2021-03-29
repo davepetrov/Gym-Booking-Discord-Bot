@@ -13,10 +13,10 @@ class Fit4lessAccount(Account):
     Account associated with fit4less account
     '''
 
-    def __init__(self, driver, password: str, emailaddress: str):
+    def __init__(self, password: str, email: str, driver=None):
         self.driver=driver
         self.password = password
-        self.email = emailaddress
+        self.email = email
         self.function = ''
         self.countbooked = 0
         self.timesbooked = {}
@@ -34,7 +34,8 @@ class Fit4lessAccount(Account):
             email = scrollTo(self.driver, self.driver.find_element_by_id('emailaddress'))
             email.send_keys(self.email)
 
-            # Find password box, set
+            # Find password box,
+            
             pw = scrollTo(self.driver, self.driver.find_element_by_id('password'))
             pw.send_keys(self.password)
 
@@ -111,7 +112,7 @@ class Fit4lessAccount(Account):
                 elif clock[-2:] == "AM" and hour == 12:
                     hour = 0
 
-                minrangetimegym = datetime.datetime.now().replace(hour=int(self.starttime[:self.starttime.find(":")],), minute=(int(self.starttime[self.starttime.find(":")+1:])))
+                minrangetimegym = datetime.datetime.now().replace(hour=int(self.starttime[:self.starttime.find(":")]), minute=(int(self.starttime[self.starttime.find(":")+1:])))
                 timegym = datetime.datetime.now().replace(hour=int(hour), minute=int(minute))
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
