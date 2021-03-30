@@ -91,7 +91,7 @@ function sendLocationsMessage(message, id) {
     message.author.send(msg);
 
     message.author.send({
-        files: ["./resources/locations.txt"],
+        files: ["./resources/fit4less-locations.txt"],
     });
     return;
 }
@@ -133,7 +133,7 @@ function isUserAuto(id) {
 
 function isValidLocation(message, location) {
     const validLocations = [];
-    const data = fs.readFileSync("./resources/locations.txt", "UTF-8");
+    const data = fs.readFileSync("./resources/fit4less-locations.txt", "UTF-8");
     const lines = data.split(/\r?\n/);
     lines.forEach((line) => {
         validLocations.push(line);
@@ -328,6 +328,7 @@ function logBookResponse(id, command, status){
     // # 4 : Not logged in 
     // # 500: Api error
     // # 400: User error
+    // # Else: Unknown error
     if (status==0){
         var desc="Successfully booked"
     }else if (status==1){

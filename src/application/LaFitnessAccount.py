@@ -65,13 +65,25 @@ class LaFitnessAccount(Account):
                 return False
 
             alltimes_table = self.driver.find_element_by_css_selector("#tblSchedule > tbody")
-            alltimes_element=alltimes_table.find_elements_by_tag_name("tr")
-            for element in alltimes_element[2:]:
-                clock=element.find_element_by_xpath("./td").text
-                if "AM" not in clock and "PM" not in clock:
+            times_rows=alltimes_table.find_elements_by_tag_name("tr")
+            dates_passed=0
+
+            for row in times_rows:
+                if self.timesReserved == MAX_RESERVATIONS:
+                    break
+
+                if not elementByXpathExists(row, "./td"):
+                    if elementExistsByClassName(row, "SubMainHeader"):
+                        date=row.find_element_by_class_name("SubMainHeader").text
+                        print("Checking", date)
+                        dates_passed+=1
                     continue
 
-                print(clock)
+                clock=row.find_element_by_xpath("./td").text
+                print('     ', clock)
+
+                if "AM" not in clock and "PM" not in clock:
+                    continue
 
                 # is a time   
                 index_of_colon = clock.find(':')
@@ -90,20 +102,31 @@ class LaFitnessAccount(Account):
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
                     # Book this time
-                    element.find_element_by_link_text("Reserve Now").click() 
+                    if not elementExistsByTagName(row, "span"):
+                        row.find_element_by_link_text("Reserve Now").click() 
 
-                    #Confirm
-                    modal=self.driver.find_element_by_class_name("bootstrap-dialog-footer-buttons")
-                    modal.find_element_by_xpath('./button[2]').click()
+                        #Confirm
+                        modal=self.driver.find_element_by_class_name("bootstrap-dialog-footer-buttons")
+                        modal.find_element_by_xpath('./button[2]').click()
 
-                    print('   ', minrangetimegym.strftime("%H:%M"), '<=', timegym.strftime("%H:%M"), '<=', maxrangetimegym.strftime("%H:%M"),  file=sys.stderr)
-                    print("Booking for "+timegym.strftime("%H:%M"), file=sys.stderr)
+                        if row.find_element_by_link_text("Reserve Now"): # NOT WORKING
+                            print('         ', "Already have maximum number of club reservations"); 
+                            continue
+                        else:
+                            print('         ', minrangetimegym.strftime("%H:%M"), '<=', timegym.strftime("%H:%M"), '<=', maxrangetimegym.strftime("%H:%M"),  file=sys.stderr)
+                            print("          Attempting to booking for "+timegym.strftime("%H:%M"), file=sys.stderr)
 
-                    return True
+                        self.timesReserved+=1
+                        
+                    else:
+                        print("         reserved")
+
 
         except Exception as e:
             print("bookTimeError:" + str(e),  file=sys.stderr)
 
+        if self.timesReserved>0:
+            return True
         return False
 
     def book(self):
@@ -113,17 +136,18 @@ class LaFitnessAccount(Account):
 
             self.driver.find_element_by_id("clubReservation").click()
             
-            clubList=self.driver.find_element_by_id("divClubList");
-            clubs=clubList.find_elements_by_class_name("row")
-            existsClub=False
-            
             self.__formatLocations()
 
             for loc in [self.location, self.locationBackup]:
+
+                clubList=self.driver.find_element_by_id("divClubList");
+                clubs=clubList.find_elements_by_class_name("row")
+                existsClub=False
+
+                print("Checking",loc, file=sys.stderr)
                 # check if club exists
                 for club in clubs:
                     clubname=club.find_element_by_class_name("clubname").text
-                    print(loc.upper(), clubname)
                     if loc.upper() in clubname:
                         # Exists a club
                         existsClub=True
@@ -137,12 +161,16 @@ class LaFitnessAccount(Account):
                 booked = self.__bookTime()
                 if booked:
                     print("     Booked at", loc,  file=sys.stderr)
-                    return 0 # Lafitness only allows for one booking at a time
+                    if self.timesReserved == MAX_RESERVATIONS:
+                        break
                 else:
                     print("     Unable to book, all time slots taken at", loc,  file=sys.stderr)
             
                 if not self.locationBackup:
                     break
+                else:
+                    self.driver.find_element_by_css_selector("#ctl00_MainContent_ucScheduleBooking_btnChangeClub").click()
+                    sleep(2)
                 
             
         except Exception as e:
@@ -154,9 +182,31 @@ class LaFitnessAccount(Account):
 
     def getReserved(self):
         try:
-            pass
+            if not self.login():
+                return 4
+            
+            self.driver.find_element_by_id("clubReservation").click()
 
+            #Click  on randomclub
+            self.driver.find_element_by_id("ctl00_MainContent_rpClubList_ctl01_btnReserve").click()
+
+            # CLick on the Reservations box
+            alltimes_table=self.driver.find_element_by_css_selector("#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody").click()
+            times_rows=alltimes_table.find_elements_by_tag_name("tr")
+
+            for row in times_rows:
+                if not elementByXpathExists(row, "./td"):
+                    reservation=row.find_element_by_xpath("./td");
+                    self.timesbooked.append(reservation.text)
+                    print(reservation.text)
+                    
+                else:
+                    print("No Reservations")
+
+            if len(self.timesbooked):
+                return 0
+            return 1
+            
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
             return 500
-        return 0

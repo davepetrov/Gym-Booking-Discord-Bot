@@ -79,15 +79,15 @@ class Fit4lessAccount(Account):
 
     def __isClosed(self):
         try:
-            if elementByXpathExists(self.driver, "/html/body/div[2]/div/div/div/div/h1"):
-                if self.driver.find_element_by_xpath("/html/body/div[2]/div/div/div/div/h1").text == "Your club is closed":
-                    print("Your gym is closed")
-                    return 1
+            for h1 in self.driver.find_elements_by_tag_name("h1"):
+                if "closed" in h1.text:
+                    print("     Gym closed, quit")
+                    return True
 
         except Exception as e:
             print("isClosedError:" + str(e),  file=sys.stderr)
 
-        return 0
+        return False
 
     def __bookTime(self):
         try:
@@ -112,7 +112,7 @@ class Fit4lessAccount(Account):
                 elif clock[-2:] == "AM" and hour == 12:
                     hour = 0
 
-                minrangetimegym = datetime.datetime.now().replace(hour=int(self.starttime[:self.starttime.find(":")]), minute=(int(self.starttime[self.starttime.find(":")+1:])))
+                minrangetimegym = datetime.datetime.now().replace(hour=int(self.starttime[:self.starttime.find(":")],), minute=(int(self.starttime[self.starttime.find(":")+1:])))
                 timegym = datetime.datetime.now().replace(hour=int(hour), minute=int(minute))
                 maxrangetimegym = datetime.datetime.now().replace(hour=int(self.endtime[:self.endtime.find(":")]), minute=(int(self.endtime[self.endtime.find(":")+1:])))
                 if minrangetimegym <= timegym <= maxrangetimegym:
@@ -170,6 +170,10 @@ class Fit4lessAccount(Account):
                 # Select location
                 self.driver.find_element_by_xpath("//div[contains(text(),'{}')]".format(loc)).click()
 
+                # Check Gym closed
+                if self.__isClosed():
+                    return 2
+    
                 for day in days:
                     print("Checking", day, file=sys.stderr)
 

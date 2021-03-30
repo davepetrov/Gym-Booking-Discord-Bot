@@ -1,39 +1,52 @@
 
 #!/usr/bin/python3
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException  
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
-def scrollTo(driver, element):
-    driver.execute_script("""arguments[0].scrollIntoView({
+def scrollTo(parent, element):
+    parent.execute_script("""arguments[0].scrollIntoView({
             block: 'center',
             inline: 'center'
         });""", element)
-    driver.execute_script("arguments[0].scrollIntoView();", element);
+    parent.execute_script("arguments[0].scrollIntoView();", element);
     return element
 
-def elementByXpathExists(driver, xpath):
+def elementExistsByClassName(parent, classname):
     try:
-        driver.find_element_by_xpath(xpath)
+        parent.find_element_by_class_name(classname)
     except NoSuchElementException:
         return False
     return True
 
-def elementByIDExists(driver, id):
+def elementByXpathExists(parent, xpath):
     try:
-        driver.find_element_by_id(id)
+        parent.find_element_by_xpath(xpath)
     except NoSuchElementException:
         return False
     return True
 
-def elementByCssSelectorExists(driver, selector):
+def elementByIDExists(parent, id):
     try:
-        driver.find_element_by_css_selector(selector)
+        parent.find_element_by_id(id)
     except NoSuchElementException:
         return False
     return True
+
+def elementByCssSelectorExists(parent, selector):
+    try:
+        parent.find_element_by_css_selector(selector)
+    except NoSuchElementException:
+        return False
+    return True
+
+def elementExistsByTagName(parent, tag):
+    try:
+        parent.find_element_by_tag_name(tag)
+    except NoSuchElementException:
+        return False
+    return True
+
+def elementExistsByLinkText(parent, text):
+    try:
+        parent.find_element_by_link_text(text)
+    except NoSuchElementException:
+        return False
