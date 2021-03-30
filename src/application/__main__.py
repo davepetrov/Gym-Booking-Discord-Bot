@@ -55,7 +55,7 @@ person.driver=driver
 
 print("function: ", function, file=sys.stderr)
 person.function=function
-driver.implicitly_wait(5)
+driver.implicitly_wait(2)
 
 if function == 'book':
     person.location = sys.argv[5].replace('-', ' ')

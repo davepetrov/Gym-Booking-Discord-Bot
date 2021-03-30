@@ -20,7 +20,7 @@ class LaFitnessAccount(Account):
         self.email = email
         self.function = ''
         self.countbooked = 0
-        self.timesbooked = {}
+        self.timesbooked = []
         self.timesReserved = 0
         self.starttime = None
         self.endtime = None
@@ -186,26 +186,19 @@ class LaFitnessAccount(Account):
                 return 4
             
             self.driver.find_element_by_id("clubReservation").click()
-
-            #Click  on randomclub
             self.driver.find_element_by_id("ctl00_MainContent_rpClubList_ctl01_btnReserve").click()
-
-            # CLick on the Reservations box
-            alltimes_table=self.driver.find_element_by_css_selector("#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody").click()
-            times_rows=alltimes_table.find_elements_by_tag_name("tr")
-
-            for row in times_rows:
-                if not elementByXpathExists(row, "./td"):
-                    reservation=row.find_element_by_xpath("./td");
-                    self.timesbooked.append(reservation.text)
-                    print(reservation.text)
-                    
-                else:
-                    print("No Reservations")
-
-            if len(self.timesbooked):
+            if not elementByCssSelectorExists(self.driver,"#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody"):
+                print("No Reservations")
                 return 0
-            return 1
+
+            alltimes_table= self.driver.find_element_by_css_selector("#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody")
+            times_rows=alltimes_table.find_elements_by_tag_name("tr")
+            for row in times_rows[1:]:
+                if elementByXpathExists(row, "./td"):
+                    reservation=row.find_element_by_xpath("./td");
+                    print('-',', '.join(reservation.text.split("\n")[0:2]))
+
+            return 0
             
         except Exception as e:
             print("ReserveErr:", str(e), file=sys.stderr)
