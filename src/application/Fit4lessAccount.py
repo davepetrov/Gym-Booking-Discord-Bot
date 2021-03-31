@@ -81,7 +81,7 @@ class Fit4lessAccount(Account):
         try:
             for h1 in self.driver.find_elements_by_tag_name("h1"):
                 if "closed" in h1.text:
-                    print("     Gym closed, quit")
+                    print("     Gym closed, quit", file=sys.stderr)
                     return True
 
         except Exception as e:

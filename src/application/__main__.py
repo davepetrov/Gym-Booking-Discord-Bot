@@ -8,6 +8,7 @@ import os
 import sys
 from time import sleep, time
 
+
 # Usage: python3 -m application [fit4less/lafitness] [command] [pass] [email] [location] [location-backup] [minimum time to book] [maximum time to book]
 # Prereq: Times are in military format (##:##)
 #        Commands include: book, reserved, locations, autobook
@@ -23,6 +24,7 @@ from time import sleep, time
 # 500: Api error
 # 400: User error
 
+print("---------------Exec----------------", file=sys.stderr)
 
 gym = sys.argv[1]
 function = sys.argv[2] 
@@ -32,7 +34,7 @@ email = sys.argv[4]
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080");
 options.add_argument("--no-sandbox");
-# options.add_argument("--headless");
+options.add_argument("--headless");
 options.add_argument("--disable-gpu");
 options.add_argument("--disable-crash-reporter");
 options.add_argument("--disable-extensions");
@@ -54,6 +56,7 @@ driver=webdriver.Chrome(options=options)
 person.driver=driver
 
 print("function: ", function, file=sys.stderr)
+print("gym: ", gym, file=sys.stderr)
 person.function=function
 driver.implicitly_wait(2)
 
@@ -96,7 +99,6 @@ elif function == 'autobook':
 
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-    print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
     sys.exit(code)
@@ -110,7 +112,6 @@ elif function == 'reserved':
 
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-    print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
     sys.exit(code)
@@ -125,7 +126,6 @@ elif function == 'login':
 
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-    print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
     sys.exit(code)
@@ -135,7 +135,6 @@ else:
     print("Unknown command", file=sys.stderr)
     print(datetime.now(), file=sys.stderr)
     print("--- %s seconds ---" % round((time() - start_time),5), file=sys.stderr)
-    print("         -------------------------------", file=sys.stderr)
 
     driver.quit()
     sys.exit(400)

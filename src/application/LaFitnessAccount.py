@@ -188,7 +188,7 @@ class LaFitnessAccount(Account):
             self.driver.find_element_by_id("clubReservation").click()
             self.driver.find_element_by_id("ctl00_MainContent_rpClubList_ctl01_btnReserve").click()
             if not elementByCssSelectorExists(self.driver,"#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody"):
-                print("No Reservations")
+                print("No bookings, try picking a different location or changing your available time interval", file=sys.stdout)
                 return 0
 
             alltimes_table= self.driver.find_element_by_css_selector("#ctl00_MainContent_ucScheduleBooking_ucWorkouts_grdActivities > tbody")
