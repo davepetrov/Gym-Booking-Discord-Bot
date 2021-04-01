@@ -185,15 +185,16 @@ function isValidGym(message, location) {
     return true
 }
 
-function isValidLocation(message, location) {
+function isValidLocation(message, location, gym) {
     let id = message.author.id;
-    const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
+    // const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
 
     const validLocations = [];
-    if (user.gym == 'fit4less'){
-        const data = fs.readFileSync("./resources/fit4less-locations.txt", "UTF-8");
+    var data;
+    if (gym == 'fit4less' ){
+        data = fs.readFileSync("./resources/fit4less-locations.txt", "UTF-8");
     }else{
-        const data = fs.readFileSync("./resources/lafitness-locations.txt", "UTF-8");
+        data = fs.readFileSync("./resources/lafitness-locations.txt", "UTF-8");
     }
     const lines = data.split(/\r?\n/);
     lines.forEach((line) => {
@@ -218,9 +219,21 @@ function updateUsername(id, username) {
     ).run();
 }
 
-function isValidLogin(message, email, password) {
+function isValidLogin(message, email, password, gym) {
+
+    
+    let id = message.author.id;
+    const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
+
+    var checkGym;
+    if (gym==undefined){
+        checkGym=user.gym
+    }else{
+        checkGym=gym
+    }
+
     try {
-        execSync(`python3 -m application fit4less login ${password} ${email}`,
+        execSync(`python3 -m application ${checkGym} login ${password} ${email}`,
             function (error, stdout, stderr) {
                 console.log(stderr);
                 console.log(stdout);
@@ -228,11 +241,11 @@ function isValidLogin(message, email, password) {
             }
         );
     } catch (error) {
-        console.log("newlogin failed");
+        console.log("new login failed");
         const msg = new MessageEmbed()
             .setTitle(":grey_exclamation: CONFIG :grey_exclamation:")
             .setColor(0x009cdf)
-            .setDescription("Invalid Fit4less login, login remains the same");
+            .setDescription(`Invalid ${user.gym} login`);
         message.author.send(msg);
 
         return false;
@@ -294,22 +307,21 @@ function setConfig(
         return;
     }
 
-    if (!isValidLogin(message, email, password)) {
-        return;
-    }
-
     if (
-        !isValidLocation(message, location) ||
-        !isValidLocation(message, locationBackup)
+        !isValidLocation(message, location, gym,) ||
+        !isValidLocation(message, locationBackup, gym)
     ) {
         return;
     }
 
     if (!isUser(message)) {
+        if (!isValidLogin(message, email, password, gym)) {
+            return;
+        }
         console.log("Creating entry");
         // add new entry
         db.prepare(
-            `INSERT INTO ${dbName} (id, gym, email, password, location, locationBackup, begin, end) VALUES ('${id}', ${gym}, '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`
+            `INSERT INTO ${dbName} (id, gym, email, password, location, locationBackup, begin, end) VALUES ('${id}', '${gym}', '${email}', '${password}', '${location}', '${locationBackup}', '${begin}', '${end}')`
         ).run();
 
         const msg = new MessageEmbed()
@@ -320,10 +332,13 @@ function setConfig(
             );
         message.author.send(msg);
     } else {
+        if (!isValidLogin(message, email, password, undefined)) {
+            return;
+        }
         console.log("Updating entry");
         // update the config
         db.prepare(
-            `UPDATE ${dbName} SET gym='${gym}, email='${email}', password='${password}', location='${location}', locationBackup='${locationBackup}', begin='${begin}', end='${end}' WHERE id='${id}'`
+            `UPDATE ${dbName} SET gym='${gym}', email='${email}', password='${password}', location='${location}', locationBackup='${locationBackup}', begin='${begin}', end='${end}' WHERE id='${id}'`
         ).run();
 
         const msg = new MessageEmbed()
@@ -354,7 +369,7 @@ function updateField(message, id, fieldKey, fieldVal) {
     }
 
     if (fieldKey == "location" || fieldKey == "locationBackup") {
-        if (!isValidLocation(message, fieldVal)) {
+        if (!isValidLocation(message, fieldVal, undefined)) {
             return;
         }
     }
@@ -462,18 +477,18 @@ function book(message, id) {
          // # 1 : Invalid location
     // # 2 : Gym closed
     // # 3 : Max booked
-        if (error.status==1){
-            sendInvalidLocationMessage(message, id);
+        // if (error.status==1){
+        //     sendInvalidLocationMessage(message, id);
 
-        }else if (error.status=2){
-            sendGymClosedMessage(message, id);
+        // }else if (error.status=2){
+        //     sendGymClosedMessage(message, id);
 
-        }else if (error.status=3){
-            sendMaxBookedMessage(message, id);
-        }
-        else{
-            checkReserved(message, id);
-        }
+        // }else if (error.status=3){
+        //     sendMaxBookedMessage(message, id);
+        // }
+        // else{
+        //     checkReserved(message, id);
+        // }
     }
 
 
@@ -634,7 +649,7 @@ bot.on("message", (message) => {
                 break;
             }
 
-            if (args.length != 7) {
+            if (args.length != 8) {
                 sendHelpMessage(message, userid);
                 break;
             }
@@ -708,7 +723,7 @@ function autobookTrigger(){
 bot.on("ready", () => {
     console.log("Gym Bot is now Online with new updates");
     bot.user.setActivity("[DM ME TO USE]", {type: "PLAYING"})
-    autobookTrigger();
+    // autobookTrigger();
 });
 
 setInterval(function () {
