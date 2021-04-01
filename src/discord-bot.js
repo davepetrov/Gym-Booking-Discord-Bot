@@ -115,7 +115,7 @@ function sendInvalidLocationMessage(message, id){
     return;
 }
 
-function sendGymClosedMessage(message, id){
+function a(message, id){
     console.log(`[sendGymClosedMessage] ${id}`);
     const msg = new MessageEmbed()
         .setTitle(":grey_question: ERROR :grey_question:")
@@ -178,7 +178,7 @@ function isValidGym(message, location) {
         const msg = new MessageEmbed()
             .setTitle(":grey_exclamation: CONFIG :grey_exclamation:")
             .setColor(0xff0000)
-            .setDescription("Invalid gym (Not 'fit4less' or 'lafitness'), gym remains the same");
+            .setDescription("Invalid gym (Not 'fit4less' or 'lafitness')");
         message.author.send(msg);
         return false;
     }
@@ -221,23 +221,11 @@ function updateUsername(id, username) {
 
 function isValidLogin(message, email, password, gym) {
 
-    
-    let id = message.author.id;
-    const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
-
-    var checkGym;
-    if (gym==undefined){
-        checkGym=user.gym
-    }else{
-        checkGym=gym
-    }
-
     try {
-        execSync(`python3 -m application ${checkGym} login ${password} ${email}`,
+        execSync(`python3 -m application ${gym} login ${password} ${email}`,
             function (error, stdout, stderr) {
                 console.log(stderr);
                 console.log(stdout);
-
             }
         );
     } catch (error) {
@@ -245,7 +233,7 @@ function isValidLogin(message, email, password, gym) {
         const msg = new MessageEmbed()
             .setTitle(":grey_exclamation: CONFIG :grey_exclamation:")
             .setColor(0x009cdf)
-            .setDescription(`Invalid ${user.gym} login`);
+            .setDescription(`Invalid ${gym} login`);
         message.author.send(msg);
 
         return false;
@@ -332,7 +320,7 @@ function setConfig(
             );
         message.author.send(msg);
     } else {
-        if (!isValidLogin(message, email, password, undefined)) {
+        if (!isValidLogin(message, email, password, gym)) {
             return;
         }
         console.log("Updating entry");
@@ -474,9 +462,10 @@ function book(message, id) {
         console.log('final exit code is', error.status);
         logBookResponse(id, 'book', error.status);
 
-         // # 1 : Invalid location
-    // # 2 : Gym closed
-    // # 3 : Max booked
+            // # 1 : Invalid location
+            // # 2 : Gym closed
+            // # 3 : Max booked
+
         // if (error.status==1){
         //     sendInvalidLocationMessage(message, id);
 
