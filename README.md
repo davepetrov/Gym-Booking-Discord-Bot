@@ -1,4 +1,4 @@
-![Gym-Booking-Discord-Bot](https://socialify.git.ci/davepetrov/Gym-Booking-Discord-Bot/image?description=1&font=Inter&language=1&owner=1&pattern=Diagonal%20Stripes&theme=Light)
+![Gym-Booking-Discord-Bot](images/readme-image.jpg)
 
 *  *  *  *  *
 
