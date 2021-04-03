@@ -22,8 +22,8 @@ You can also join my discord server [here](https://discord.gg/PQzB4mmKMd). You c
 ## Commands
 `!config`
 #### Parameters:
-- Gym (lafitness/ fit4less
-- Email Address/ Username
+- Gym (lafitness/ fit4less)
+- Email Address/ Username depending on your gym
 - Password
 - Exact fit4less location
 - Exact fit4less location (Backup)
