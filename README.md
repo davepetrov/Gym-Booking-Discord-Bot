@@ -1,4 +1,4 @@
-![Gym-Booking-Discord-Bot](https://socialify.git.ci/davepetrov/Gym-Booking-Discord-Bot/image?description=1&font=Inter&language=1&owner=1&pattern=Diagonal%20Stripes&theme=Light)
+[![Gym-Booking-Discord-Bot](images/readme-image.jpg)](https://bookmebot.com/)
 
 *  *  *  *  *
 
@@ -22,7 +22,8 @@ You can also join my discord server [here](https://discord.gg/PQzB4mmKMd). You c
 ## Commands
 `!config`
 #### Parameters:
-- Email Address/ Username
+- Gym (lafitness/ fit4less)
+- Email Address/ Username depending on your gym
 - Password
 - Exact fit4less location
 - Exact fit4less location (Backup)
