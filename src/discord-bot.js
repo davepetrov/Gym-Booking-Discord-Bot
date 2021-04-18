@@ -29,7 +29,7 @@ function sendConfigErrorMessage(message, id) {
         .setTitle(":question: ERROR :question:")
         .setColor(0xff0000)
         .setDescription(
-            "Dont forget to setup your configuration using !config [email] [password] [location] [backup location] [start time] [end time]"
+            "Dont forget to setup your configuration using !config [gym] [email] [password] [location] [backup location] [start time] [end time]"
         );
 
     message.author.send(msg);
@@ -82,6 +82,21 @@ function sendLocationsMessage(message, id) {
     console.log(`[sendLocationsMessage] ${id}`);
 
     const user = db.prepare(`SELECT * FROM ${dbName} WHERE id=${id}`).get();
+
+    if (user==undefined){
+        const msg = new MessageEmbed()
+        .setTitle(`:question: Locations for Fit4less and LaFitness :question:`)
+        .setColor(0xff0000)
+        .setDescription(
+            "Copy the EXACT location (Case sensitive, must include '-') and use that as a location parameter when setting up your configuration. Check !help for more help"
+        );
+        message.author.send(msg);
+
+        message.author.send({
+            files: ["./resources/lafitness-locations.txt", "./resources/fit4less-locations.txt"],
+        });
+        return
+    }
 
     const msg = new MessageEmbed()
         .setTitle(`:question: Locations for ${user.gym} :question:`)
@@ -715,10 +730,10 @@ bot.on("ready", () => {
     // autobookTrigger();
 });
 
-setInterval(function () {
-    var d = new Date();
-    var time = d.getMinutes();
-    if (time==0 || time==15|| time==30 || time==45){
-        autobookTrigger();
-    }
-}, 60000); // Repeat every 60000 milliseconds (1 min)
+// setInterval(function () {
+//     var d = new Date();
+//     var time = d.getMinutes();
+//     if (time==0 || time==15|| time==30 || time==45){
+//         autobookTrigger();
+//     }
+// }, 60000); // Repeat every 60000 milliseconds (1 min)
