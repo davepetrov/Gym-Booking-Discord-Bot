@@ -130,7 +130,7 @@ function sendInvalidLocationMessage(message, id){
     return;
 }
 
-function a(message, id){
+function sendGymClosedMessage(message, id){
     console.log(`[sendGymClosedMessage] ${id}`);
     const msg = new MessageEmbed()
         .setTitle(":grey_question: ERROR :grey_question:")
@@ -481,18 +481,18 @@ function book(message, id) {
             // # 2 : Gym closed
             // # 3 : Max booked
 
-        // if (error.status==1){
-        //     sendInvalidLocationMessage(message, id);
+        if (error.status==1){
+            sendInvalidLocationMessage(message, id);
 
-        // }else if (error.status=2){
-        //     sendGymClosedMessage(message, id);
+        }else if (error.status=2){
+            sendGymClosedMessage(message, id);
 
-        // }else if (error.status=3){
-        //     sendMaxBookedMessage(message, id);
-        // }
-        // else{
-        //     checkReserved(message, id);
-        // }
+        }else if (error.status=3){
+            sendMaxBookedMessage(message, id);
+        }
+        else{
+            checkReserved(message, id);
+        }
     }
 
 
