@@ -63,6 +63,6 @@ Lists all the commands with short descriptions
 
 *  *  *  *  *
 # Donate
-*Please note that the bot is free. If you feel that this utility made your life easier, do not hesitate to send a donation :) Enjoy your stress free workout. The guarenteed autobooking feature does come at a subscription of 5CAD/month. As a free user, you have access to manual bookings through discord*
+*Please note that the bot is free. If you feel that this utility made your life easier, do not hesitate to send a donation :) Enjoy your stress free workout. 
 
 To donate, join the public server [here](https://discord.gg/PQzB4mmKMd) and type 'donate' in the donations text chat
