@@ -30,14 +30,14 @@ You can also join my discord server [here](https://discord.gg/PQzB4mmKMd). You c
 - Minimum time range to book (24 hour)
 - Maximum time range to book (24 hour)
 
-This command sets up the configuration with all of your login details, preferred location, and your time interval for which you would want the bot to book for. The bot will find the earliest time slot available within this timestamp and book for that day, if available. For example if you are not already a user, you can call `!config lafitness default@email password123 gym-location gym-location-backup 11:00 17:00` to be added to our list of users with all the custom configuration. If you are already a user, calling the exact same command will update your previous config. *Times are in 24 hour format (##:##) and all locations are found if you call the `!locations` command*
+This command sets up the configuration with all of your login details, preferred location, and your time interval for which you would want the bot to book for. The bot will find the earliest time slot available within this timestamp and book for that day, if available. For example if you are not already a user, you can call `!config new` to be added to our list of users with all the custom configuration. If you are already a user, calling the exact same command will update your previous config. *Times are in 24 hour format (##:##) and all locations are found if you call the `!locations` command*
 
 You can also use `!config -{Field} {Value}` to update a particular field in your configuration. For example, if you want to update your previous email, call `!config -email new@email`. List of available fields include: gym, email/username, password, location, locationBackup, begin, end
 
 #### Usage(s):
 
 - `!config` *To get the config. You need to setup your configuration before calling this command*
-- `!config ['lafitness' or 'fit4less] [EMAIL] [PASSWORD] [LOCATION] [BACKUP LOCATION] [START TIME] [END TIME]` *To get add/update your entire config*
+- `!config new` *To get add/update your entire gym configuration*
 - `!config -[FIELD] [VALUE]` *To update a specific field. You need to setup your configuration before calling this command*
 
 
