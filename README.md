@@ -3,19 +3,21 @@
 *  *  *  *  *
 
 ## Description
-The *Book Me Bot™* gym chatbot allows you to easily view and autobook available times at your local gym, helping you stick to your important workout schedule and stay on track during COVID-19.
+📅 The *Book Me Bot™* gym chatbot allows you to easily view and autobook available times at your local gym, helping you stick to your important workout schedule and stay on track during COVID-19.
 
-Sometimes it feels like there is no end in sight for COVID-19 restrictions. Even after vaccines are administered, government officials believe that the current situation may last for years to come. This means that even when gyms reopen, they will still enforce strict capacity rules and you will be required to book your workout time well in advance.
+😞 Sometimes it feels like there is no end in sight for COVID-19 restrictions. Even after vaccines are administered, government officials believe that the current situation may last for years to come. This means that even when gyms reopen, they will still enforce strict capacity rules and you will be required to book your workout time well in advance.
 
-**PROBLEM:** We've all been in the same position before - you log into your gym portal, click on the calendar to view available workout times, and see that everything is booked for the next month. How are you supposed to get your pump on these days?
+⌛ **PROBLEM:**
+We've all been in the same position before - you log into your gym portal, click on the calendar to view available workout times, and see that everything is booked for the next month. How are you supposed to get your pump on these days?
 
-**SOLUTION:** visit **www.bookmebot.com** to book your workout quickly and easily, while also guaranteeing reservation times for your future workouts. Through the Discord app, you can select your gym, specify your workout time range, and let the bot book your time slot ahead of anyone else. You will also receive a reminder about your upcoming workout. Guarantee your gym booking time, EVERY TIME!
+🚀 **SOLUTION:**
+Visit **www.bookmebot.com** to book your workout quickly and easily, while also guaranteeing reservation times for your future workouts. Through the Discord app, you can select your gym, specify your workout time range, and let the bot book your time slot ahead of anyone else. You will also receive a reminder about your upcoming workout. Guarantee your gym booking time, EVERY TIME!
 
 **Update: The Book Me Bot™ gym chatbot is currently available on the Discord App and supports Fit4Less and LA Fitness gyms. More platforms and gyms coming soon. Join the [Discord group](https://discord.com/invite/PQzB4mmKMd)**
 
 *  *  *  *  *
 
-# How To Use The Gym Bot: 
+# How To Use The Gym Bot 💪 
 
 ### Join the Discord public server! (New Feature & Bug Fix Announcements)
 Join the [Discord group](https://discord.com/invite/PQzB4mmKMd). You can type your commands and interact with the bot by **direct messaging** it.
@@ -71,7 +73,7 @@ Book Me Bot™ replies with a list of available locations. You can copy a locati
 Lists all Book Me Bot™ commands with short descriptions.
 
 *  *  *  *  *
-# Donate
-*Please note that Book Me Bot™ is currently free. If you use Book Me Bot™ to book your workouts, please consider sending the creator a donation :-) Enjoy your stress-free workout! 
+# Donate 🏋️
+Please note that Book Me Bot™ is currently free. If you use Book Me Bot™ to book your workouts, please consider sending the creator a donation :-) Enjoy your stress-free workout and get your pump on! 
 
 To donate, join the public server [here](https://discord.gg/PQzB4mmKMd) and type 'donate' in the donations text chat
