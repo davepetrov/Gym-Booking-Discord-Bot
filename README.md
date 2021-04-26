@@ -3,9 +3,15 @@
 *  *  *  *  *
 
 ## Description
-A Discord bot that helps you book the gym times during COVID-19. Nowadays, gyms are completely booked, but now its time to workout after months of endless quarantine. Let the bot do the annoying part...the booking! Through discord, you can specify a time range that you want to work out, the specific gym(s) you are signed up for, and the bot will book the time slot for you before anyone else can take your spot and will remind you when your next work out will be. Now you can go to the gym without worrying about missing an available time slot that fits your schedule.
+The Book Me Bot™ gym chatbot allows you to easily view and autobook available times at your local gym, helping you stick to your important workout schedule and stay on track during COVID-19.
 
-This bot was originally a personal project, but with Canada opening in the following weeks, more traffic is picking up so ive decided to open up the bot for public use
+Sometimes it feels like there is no end in sight for COVID-19 restrictions. Even after vaccines are administered, government officials believe that the current situation may last for years to come. This means that even when gyms reopen, they will still enforce strict capacity rules and you will be required to book your workout time well in advance.
+
+PROBLEM: We've all been in the same position before - you log into your gym portal, click on the calendar to view available workout times, and see that everything is booked for the next month. How are you supposed to get your pump on these days?
+
+SOLUTION: visit www.bookmebot.com to book your workout quickly and easily, while also guaranteeing reservation times for your future workouts. Through the Discord app, you can select your gym, specify your workout time range, and let the bot book your time slot ahead of anyone else. You will also receive a reminder about your upcoming workout. Guarantee your gym booking time, EVERY TIME!
+
+
 
 *  *  *  *  *
 
