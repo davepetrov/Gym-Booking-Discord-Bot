@@ -11,7 +11,7 @@ PROBLEM: We've all been in the same position before - you log into your gym port
 
 SOLUTION: visit www.bookmebot.com to book your workout quickly and easily, while also guaranteeing reservation times for your future workouts. Through the Discord app, you can select your gym, specify your workout time range, and let the bot book your time slot ahead of anyone else. You will also receive a reminder about your upcoming workout. Guarantee your gym booking time, EVERY TIME!
 
-//Update: The Book Me Bot™ gym chatbot is currently available on the Discord App and supports Fit4Less and LA Fitness gyms. More platforms and gyms coming soon. Join the Discord group here: https://discord.com/invite/PQzB4mmKMd
+**Update: The Book Me Bot™ gym chatbot is currently available on the Discord App and supports Fit4Less and LA Fitness gyms. More platforms and gyms coming soon. Join the Discord group here: https://discord.com/invite/PQzB4mmKMd**
 
 *  *  *  *  *
 
