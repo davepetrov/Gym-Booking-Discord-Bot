@@ -13,14 +13,14 @@ We've all been in the same position before - you log into your gym portal, click
 🚀 **SOLUTION:**
 Visit **www.bookmebot.com** to book your workout quickly and easily, while also guaranteeing reservation times for your future workouts. Through the Discord app, you can select your gym, specify your workout time range, and let the bot book your time slot ahead of anyone else. You will also receive a reminder about your upcoming workout. Guarantee your gym booking time, EVERY TIME!
 
-**Update: The Book Me Bot™ gym chatbot is currently available on the Discord App and supports Fit4Less and LA Fitness gyms. More platforms and gyms coming soon. Join the [Discord group](https://discord.com/invite/PQzB4mmKMd)**
+**Update: The Book Me Bot™ gym chatbot is currently available on the Discord App and supports Fit4Less and LA Fitness gyms. More platforms and gyms coming soon. Join the [Discord group](https://discord.gg/cDExME6fV5)**
 
 *  *  *  *  *
 
 # How To Use The Gym Bot 💪 
 
 ### Join the Discord public server! (New Feature & Bug Fix Announcements)
-Join the [Discord group](https://discord.com/invite/PQzB4mmKMd). You can type your commands and interact with the bot by **direct messaging** it.
+Join the [Discord group](https://discord.gg/cDExME6fV5). You can type your commands and interact with the bot by **direct messaging** it.
 *Please do not put your private config in public chats.*
 
 ###### *Note*: The bot is currently up and running. **If there are any issues**, please contact us by creating an issue request on GitHub with an attached screenshot.
@@ -76,4 +76,4 @@ Lists all Book Me Bot™ commands with short descriptions.
 # Donate 🏋️
 Please note that Book Me Bot™ is currently free. If you use Book Me Bot™ to book your workouts, please consider sending the creator a donation :-) Enjoy your stress-free workout and get your pump on! 
 
-To donate, join the public server [here](https://discord.gg/PQzB4mmKMd) and type 'donate' in the donations text chat
+To donate, join the public server [here](https://discord.gg/cDExME6fV5) and type 'donate' in the donations text chat
