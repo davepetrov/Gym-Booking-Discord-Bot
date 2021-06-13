@@ -1,4 +1,4 @@
-[![Gym-Booking-Discord-Bot](images/readme-image.png)](https://bookmebot.com/)
+[![Gym-Booking-Discord-Bot](images/readme-image-new.png)](https://bookmebot.com/)
 
 *  *  *  *  *
 
