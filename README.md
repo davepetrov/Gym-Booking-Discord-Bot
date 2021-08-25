@@ -76,4 +76,10 @@ Lists all Book Me Bot™ commands with short descriptions.
 # Donate 🏋️
 Please note that Book Me Bot™ is currently free. If you use Book Me Bot™ to book your workouts, please consider sending the creator a donation :-) Enjoy your stress-free workout and get your pump on! 
 
-To donate, join the public server [here](https://discord.gg/cDExME6fV5) and type 'donate' in the donations text chat
+### We accept donations via Crypto Currency!
+
+Bitcoin : 1JJa2iZTBRYYfAhkpiyVoaWuKnDjeUqc2k
+
+Ethereum: 0x7A93381a0Ca5036653FF0D25F5B00B9C5f00cea4
+
+DogeCoin: DFVdCN4EBYxqTgbGTUjMyyp3XkXtEAhG1L
