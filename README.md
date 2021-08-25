@@ -28,49 +28,29 @@ Join the [Discord group](https://discord.gg/cDExME6fV5). You can type your comma
 
 *  *  *  *  *
 
-## Commands
-`!config`
-#### Parameters:
-- Gym (lafitness/ fit4less)
-- Email Address/ Username depending on your gym
-- Password
-- Exact fit4less location
-- Exact fit4less location (Backup)
-- Minimum time range to book (24 hour)
-- Maximum time range to book (24 hour)
-
-This command sets up the configuration with all of your login details, preferred location, and workout time range in which the bot will book you a time. Book Me Bot™ will find the earliest time slot available within this time range and book it for that day.
-
-If you are not already a user, you can call `!config new` to be added to our list of users with your custom configuration. If you are already a user, calling the same command will update your previous config. *Times are in 24 hour format (##:##) and you can view all locations if you call the `!locations` command*
-
-You can also use `!config -{Field} {Value}` to update a particular field in your configuration. For example, if you want to update your previous email, call `!config -email new@email`. Available fields include: gym, email/username, password, location, locationBackup, begin, end
-
-#### Usage(s):
+**Usage(s):**
 
 - `!config` *To get the config - You need to set up your configuration before calling this command*
 - `!config new` *To get add/update your entire gym configuration*
-- `!config -[FIELD] [VALUE]` *To update a specific field - You need to set up your configuration before calling this command*
+- `!config [FIELD] [VALUE]` *To update a specific field. You can do this only one field at a time - You need to set up your configuration before calling this command 
+
+(Fields include: Gym, Email, Password, Location, BackupLocation, WeekdayBeginTime, WeekendBeginTime, WeekdayEndTime, WeekendEndTime*
 
 
 `!book` 
-
 This command handles the automated booking process, reserving all the times within the specific time range that you select. For example, if you want to book a time between 11:00 and 17:00 for the "Centerpoint-Mall" location, you can call the `!book` command from the server and gets a private message revealing your private login information with all your booked times. *You need to setup your configuration before calling this command*
 
 `!autobook` 
-
-You can toggle on and off if you want Book Me Bot™ to autobook for you without you having to use the `!book` command every 3 days. *You need to setup your configuration before calling this command*
+You can toggle on and off if you want Book Me Bot to autobook for you without you having to use the `!book` command every 3 days. *You need to setup your configuration before calling this command*
 
 `!reserved`
-
 Lists all of your booked workout times. *You need to setup your configuration before calling this command*  
 
 `!locations`
-
-Book Me Bot™ replies with a list of available locations. You can copy a location into the [location] field when setting up the config.
+Book Me Bot:tm: replies with a list of available locations. You can copy a location into the [location] field when setting up the config.
 
 `!help`
-
-Lists all Book Me Bot™ commands with short descriptions.
+Lists all Book Me Bot:tm: commands with short descriptions.
 
 *  *  *  *  *
 # Donate 🏋️
