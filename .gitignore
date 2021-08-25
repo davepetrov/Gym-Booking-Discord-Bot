@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 # Bookmebot files
-./BookMeBot/resources/config.json
-./BookMeBot/db/
-./BookMeBot/vm-keys/
+config.json
+db/
+vm-keys/
