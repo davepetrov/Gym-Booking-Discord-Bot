@@ -1,0 +1,19 @@
+{
+  "name": "bookmebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "discord-bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Petrov <davidpetrovx@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "better-sqlite3": "^7.4.1",
+    "date-and-time": "^1.0.1",
+    "discord.js": "^12.5.3",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1"
+  }
+}
