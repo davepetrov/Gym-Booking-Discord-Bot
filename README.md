@@ -58,8 +58,8 @@ Please note that Book Me Bot™ is currently free. If you use Book Me Bot™ to 
 
 ### We accept donations via Crypto Currency!
 
-Bitcoin : 1JJa2iZTBRYYfAhkpiyVoaWuKnDjeUqc2k
+Bitcoin : 38U1M5Dt6Z35kfBEymAj3NjFdZ9ia7Hmpm
 
-Ethereum: 0x7A93381a0Ca5036653FF0D25F5B00B9C5f00cea4
+Ethereum: 0x6C42d619E3BF448983B4E6426cB53a64123F1959
 
-DogeCoin: DFVdCN4EBYxqTgbGTUjMyyp3XkXtEAhG1L
+DogeCoin: DNCH6GctkYvD8L9hekDuK1bCBGNFnNMHHT
